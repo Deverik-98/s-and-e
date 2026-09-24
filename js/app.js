@@ -28,22 +28,35 @@
     return String(table[key] || i18n.es[key] || key).replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? "");
   };
 
+  function guestName() {
+    const name = String(state.guest?.name || "").trim();
+    return state.guest && state.guest.ok !== false && name ? name : "";
+  }
+
+  function named(key) {
+    const name = guestName();
+    return name ? t(`${key}For`, { name }) : t(key);
+  }
+
   function applyLang() {
+    const name = guestName();
     document.documentElement.lang = state.lang;
-    document.title = t("docTitle");
+    document.title = named("docTitle");
     $$("[data-i18n]").forEach((el) => {
       el.textContent = t(el.dataset.i18n);
     });
     const greeting = $("#greeting");
-    if (greeting) {
-      greeting.textContent = state.guest?.name
-        ? t("greetingFor", { name: state.guest.name })
-        : t("greetingGeneric");
-    }
+    if (greeting) greeting.textContent = name ? t("greetingFor", { name }) : t("greetingGeneric");
+    const letter = $("#letter");
+    if (letter) letter.textContent = named("letter");
+    const rsvpLead = $("#rsvp-lead");
+    if (rsvpLead) rsvpLead.textContent = named("rsvpLead");
+    const hint = $(".open-hint");
+    if (hint) hint.textContent = named("openHint");
     const chip = $("#guest-chip");
     if (chip) {
-      if (state.guest?.name) {
-        chip.textContent = `${t("forGuest")} ${state.guest.name}`;
+      if (name) {
+        chip.textContent = `${t("forGuest")} ${name}`;
         chip.classList.remove("is-hidden");
       } else {
         chip.classList.add("is-hidden");
@@ -74,11 +87,14 @@
     declineBtn.classList.toggle("is-hidden", !canRespond || value !== "pending");
     changeBtn.classList.toggle("is-hidden", !canRespond || value === "pending");
 
+    if (canRespond) confirmBtn.textContent = named("rsvpConfirm");
+    else confirmBtn.textContent = t("rsvpConfirm");
+
     if (!hasCode) status.textContent = t("rsvpNeedLink");
     else if (!guestOk) status.textContent = t("invalidCode");
-    else if (value === "yes") status.textContent = t("rsvpYes");
-    else if (value === "no") status.textContent = t("rsvpNo");
-    else status.textContent = t("rsvpPending");
+    else if (value === "yes") status.textContent = named("rsvpYes");
+    else if (value === "no") status.textContent = named("rsvpNo");
+    else status.textContent = named("rsvpPending");
   }
 
   function playOpenSound() {

@@ -1,21 +1,21 @@
 /**
  * Hoja + Web App para RSVP de S&E.
  *
- * 1. Crea una hoja en Drive y pega este archivo en Extensiones > Apps Script.
- * 2. En el desplegable de funciones elige initSheet (no doGet) y pulsa Ejecutar.
- * 3. Implementar > Nueva implementación > Aplicación web
- *    - Ejecutar como: yo
- *    - Quién tiene acceso: Cualquier persona
- * 4. Copia la URL de la app en js/config.js → scriptUrl
+ * La web sigue usando yes/no/pending.
+ * En la hoja todo se guarda en español.
  *
  * Enlaces: https://deverik-98.github.io/s-and-e/nos-casamos/CODIGO
- * El código es opaco (no correlativo) y corto.
  */
 
 var SHEET_NAME = "Invitados";
+var TZ = "America/Caracas";
+var DATE_FMT = "dd/MM/yyyy h:mm a";
 var ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
 var CODE_LEN = 6;
-var HEADERS = ["code", "name", "variant", "status", "updated_at", "created_at"];
+var HEADERS = ["Código", "Nombre", "Tipo", "Estado", "Actualizado", "Creado"];
+
+var STATUS_SHEET = { pending: "Pendiente", yes: "Confirmado", no: "No asiste" };
+var VARIANT_SHEET = { completo: "Completo", iglesia: "Solo iglesia" };
 
 function doGet(e) {
   var p = (e && e.parameter) || {};
@@ -32,22 +32,80 @@ function doGet(e) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
-function initSheet() {
+function actualizarHoja() {
+  var ss = SpreadsheetApp.getActive();
+  ss.setSpreadsheetTimeZone(TZ);
+  ss.setSpreadsheetLocale("es_VE");
   var sh = sheet_();
-  sh.clear();
-  sh.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
-  sh.setFrozenRows(1);
+  var lastCol = Math.max(sh.getLastColumn(), HEADERS.length);
+  var lastRow = Math.max(sh.getLastRow(), 1);
+  var values = sh.getRange(1, 1, lastRow, lastCol).getValues();
+  if (!values.length) values = [[]];
+
+  values[0] = HEADERS.slice();
+  for (var i = 1; i < values.length; i++) {
+    var row = values[i];
+    if (!row[0]) continue;
+    row[2] = toSheetVariant_(row[2]);
+    row[3] = toSheetStatus_(fromSheetStatus_(row[3]));
+    row[4] = toDate_(row[4]);
+    row[5] = toDate_(row[5]);
+  }
+
+  sh.getRange(1, 1, values.length, HEADERS.length).setValues(
+    values.map(function (row) { return row.slice(0, HEADERS.length); })
+  );
+  applyStyles_(sh);
+}
+
+function initSheet() {
+  actualizarHoja();
 }
 
 function seedDemo() {
   return addGuest("Invitado especial", "completo");
 }
 
+function addGuestPrompt() {
+  var ui = SpreadsheetApp.getUi();
+  var nameBox = ui.prompt("Nombre del invitado", "Ejemplo: Ana Pérez", ui.ButtonSet.OK_CANCEL);
+  if (nameBox.getSelectedButton() !== ui.Button.OK) return;
+  var name = String(nameBox.getResponseText() || "").trim();
+  if (!name) {
+    ui.alert("Escribe un nombre.");
+    return;
+  }
+  var typeBox = ui.prompt("Tipo de invitación", "completo o iglesia", ui.ButtonSet.OK_CANCEL);
+  if (typeBox.getSelectedButton() !== ui.Button.OK) return;
+  var variant = String(typeBox.getResponseText() || "completo").trim().toLowerCase();
+  if (variant !== "iglesia") variant = "completo";
+  var result = addGuest(name, variant);
+  ui.alert("Invitación lista", result.url, ui.ButtonSet.OK);
+}
+
+function listInviteUrls() {
+  var values = sheet_().getDataRange().getValues();
+  var lines = [];
+  for (var i = 1; i < values.length; i++) {
+    if (!values[i][0]) continue;
+    lines.push((values[i][1] || "(sin nombre)") + "\nhttps://deverik-98.github.io/s-and-e/nos-casamos/" + values[i][0]);
+  }
+  SpreadsheetApp.getUi().alert(lines.length ? lines.join("\n\n") : "No hay invitados.");
+}
+
 function addGuest(name, variant) {
   var sh = sheet_();
   var code = uniqueCode_();
-  var now = new Date().toISOString();
-  sh.appendRow([code, name, variant || "completo", "pending", "", now]);
+  var now = new Date();
+  sh.appendRow([
+    code,
+    name,
+    toSheetVariant_(variant || "completo"),
+    STATUS_SHEET.pending,
+    "",
+    now,
+  ]);
+  applyStyles_(sh);
   return {
     ok: true,
     code: code,
@@ -61,22 +119,22 @@ function getGuest(code) {
   return {
     ok: true,
     name: row.name,
-    variant: row.variant || "completo",
-    status: row.status || "pending",
+    variant: row.variant,
+    status: row.status,
   };
 }
 
 function setRsvp(code, status) {
-  var allowed = { yes: true, no: true, pending: true };
-  if (!allowed[status]) return { ok: false, error: "bad_status" };
+  if (!STATUS_SHEET[status]) return { ok: false, error: "bad_status" };
   var row = find_(code);
   if (!row) return { ok: false, error: "not_found" };
   var sh = sheet_();
-  sh.getRange(row.index, 4, 1, 2).setValues([[status, new Date().toISOString()]]);
+  sh.getRange(row.index, 4, 1, 2).setValues([[STATUS_SHEET[status], status === "pending" ? "" : new Date()]]);
+  applyStyles_(sh);
   return {
     ok: true,
     name: row.name,
-    variant: row.variant || "completo",
+    variant: row.variant,
     status: status,
   };
 }
@@ -95,8 +153,8 @@ function find_(code) {
       return {
         index: i + 1,
         name: values[i][1],
-        variant: values[i][2],
-        status: values[i][3],
+        variant: fromSheetVariant_(values[i][2]),
+        status: fromSheetStatus_(values[i][3]),
       };
     }
   }
@@ -124,10 +182,83 @@ function randomCode_() {
   return out;
 }
 
+function fromSheetStatus_(value) {
+  var raw = String(value || "").trim().toLowerCase();
+  if (raw === "yes" || raw === "confirmado") return "yes";
+  if (raw === "no" || raw === "no asiste") return "no";
+  return "pending";
+}
+
+function fromSheetVariant_(value) {
+  var raw = String(value || "").trim().toLowerCase();
+  if (raw === "iglesia" || raw === "solo iglesia") return "iglesia";
+  return "completo";
+}
+
+function toSheetStatus_(status) {
+  return STATUS_SHEET[status] || STATUS_SHEET.pending;
+}
+
+function toSheetVariant_(variant) {
+  return VARIANT_SHEET[fromSheetVariant_(variant)];
+}
+
+function toDate_(value) {
+  if (!value) return "";
+  if (Object.prototype.toString.call(value) === "[object Date]" && !isNaN(value.getTime())) return value;
+  var parsed = new Date(value);
+  return isNaN(parsed.getTime()) ? "" : parsed;
+}
+
+function applyStyles_(sh) {
+  var ss = SpreadsheetApp.getActive();
+  ss.setSpreadsheetTimeZone(TZ);
+  var lastRow = Math.max(sh.getMaxRows(), 2);
+  sh.getRange(1, 1, 1, HEADERS.length)
+    .setFontFamily("Arial")
+    .setFontWeight("bold")
+    .setFontColor("#ffffff")
+    .setBackground("#0A2A6B")
+    .setHorizontalAlignment("center");
+  sh.setFrozenRows(1);
+  sh.setRowHeight(1, 32);
+  sh.setColumnWidths(1, 1, 110);
+  sh.setColumnWidth(2, 220);
+  sh.setColumnWidth(3, 130);
+  sh.setColumnWidth(4, 130);
+  sh.setColumnWidth(5, 170);
+  sh.setColumnWidth(6, 170);
+  sh.getRange(2, 5, lastRow - 1, 2).setNumberFormat(DATE_FMT);
+  sh.getRange(2, 1, lastRow - 1, HEADERS.length)
+    .setFontFamily("Arial")
+    .setVerticalAlignment("middle");
+
+  var data = sh.getRange(2, 1, lastRow - 1, HEADERS.length);
+  sh.setConditionalFormatRules([
+    SpreadsheetApp.newConditionalFormatRule()
+      .whenFormulaSatisfied('=$D2="Confirmado"')
+      .setBackground("#d9ead3")
+      .setRanges([data])
+      .build(),
+    SpreadsheetApp.newConditionalFormatRule()
+      .whenFormulaSatisfied('=$D2="No asiste"')
+      .setBackground("#f4cccc")
+      .setRanges([data])
+      .build(),
+    SpreadsheetApp.newConditionalFormatRule()
+      .whenFormulaSatisfied('=$D2="Pendiente"')
+      .setBackground("#fff2cc")
+      .setRanges([data])
+      .build(),
+  ]);
+}
+
 function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu("Invitación S&E")
-    .addItem("Inicializar hoja", "initSheet")
+    .addItem("Añadir invitado", "addGuestPrompt")
+    .addItem("Ver enlaces", "listInviteUrls")
     .addItem("Crear invitado de prueba", "seedDemo")
+    .addItem("Actualizar hoja (español y estilos)", "actualizarHoja")
     .addToUi();
 }
