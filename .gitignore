@@ -1,0 +1,16 @@
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.local
+.env.*.local
+node_modules/
+dist/
+out/
+target/
+build/
+.idea/
+*.iml
+.vscode/
+S&E.code-workspace
+insumos/
