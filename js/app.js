@@ -159,9 +159,15 @@
     }
     try {
       const data = await scriptGet({ action: "guest", i: state.code });
+      if (!data.ok && state.code === "demo") {
+        state.guest = { ok: true, name: "Invitado especial", variant: "completo", status: "pending" };
+        return;
+      }
       state.guest = data;
     } catch {
-      state.guest = { ok: false };
+      state.guest = state.code === "demo"
+        ? { ok: true, name: "Invitado especial", variant: "completo", status: "pending" }
+        : { ok: false };
     }
   }
 

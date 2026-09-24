@@ -2,7 +2,7 @@
  * Hoja + Web App para RSVP de S&E.
  *
  * 1. Crea una hoja en Drive y pega este archivo en Extensiones > Apps Script.
- * 2. Ejecuta initSheet() una vez.
+ * 2. En el desplegable de funciones elige initSheet (no doGet) y pulsa Ejecutar.
  * 3. Implementar > Nueva implementación > Aplicación web
  *    - Ejecutar como: yo
  *    - Quién tiene acceso: Cualquier persona
@@ -37,6 +37,10 @@ function initSheet() {
   sh.clear();
   sh.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
   sh.setFrozenRows(1);
+}
+
+function seedDemo() {
+  return addGuest("Invitado especial", "completo");
 }
 
 function addGuest(name, variant) {
@@ -124,5 +128,6 @@ function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu("Invitación S&E")
     .addItem("Inicializar hoja", "initSheet")
+    .addItem("Crear invitado de prueba", "seedDemo")
     .addToUi();
 }
