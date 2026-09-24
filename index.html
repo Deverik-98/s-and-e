@@ -16,9 +16,6 @@
         SE.code = (q || (!reserved[last] ? decodeURIComponent(last) : "")).trim();
         if (!SE.code) return;
         try { SE.cachedGuest = JSON.parse(localStorage.getItem("se-guest:" + SE.code) || "null"); } catch (e) {}
-        SE.guestReady = fetch(SE.scriptUrl + "?action=guest&i=" + encodeURIComponent(SE.code))
-          .then(function (r) { return r.json(); })
-          .catch(function () { return null; });
       })();
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -152,9 +149,11 @@
           <h2 class="section-title" data-i18n="rsvpTitle">Confirmación</h2>
           <p id="rsvp-lead" class="letter-copy"></p>
           <p id="rsvp-status" class="rsvp-status"></p>
+          <div id="rsvp-party" class="party is-hidden"></div>
           <div class="rsvp-actions">
             <button id="rsvp-confirm" class="btn" type="button" data-i18n="rsvpConfirm">Confirmar asistencia</button>
             <button id="rsvp-decline" class="btn secondary" type="button" data-i18n="rsvpDecline">No podré asistir</button>
+            <button id="rsvp-save" class="btn is-hidden" type="button" data-i18n="rsvpSave">Guardar confirmación</button>
             <button id="rsvp-change" class="btn secondary is-hidden" type="button" data-i18n="rsvpCancel">Cambiar respuesta</button>
           </div>
         </div>

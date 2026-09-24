@@ -8,6 +8,8 @@
     guest: window.SE.cachedGuest && window.SE.cachedGuest.ok !== false ? window.SE.cachedGuest : null,
     code: window.SE.code || readInviteCode(),
     opened: false,
+    picking: false,
+    guestRequested: false,
   };
 
   function readInviteCode() {
@@ -37,8 +39,21 @@
     return state.guest && state.guest.ok !== false && name ? name : "";
   }
 
+  function partyList() {
+    const party = Array.isArray(state.guest?.party) ? state.guest.party : [];
+    if (party.length) return party;
+    const name = guestName();
+    if (!name) return [];
+    return [{ id: "1", name, role: "titular", status: state.guest?.status || "pending" }];
+  }
+
+  function isGroup() {
+    return partyList().length > 1;
+  }
+
   function named(key) {
     const name = guestName();
+    if (name && isGroup() && i18n[state.lang][`${key}ForGroup`]) return t(`${key}ForGroup`, { name });
     return name ? t(`${key}For`, { name }) : t(key);
   }
 
@@ -50,7 +65,11 @@
       el.textContent = t(el.dataset.i18n);
     });
     const greeting = $("#greeting");
-    if (greeting) greeting.textContent = name ? t("greetingFor", { name }) : t("greetingGeneric");
+    if (greeting) {
+      greeting.textContent = !name
+        ? t("greetingGeneric")
+        : isGroup() ? t("greetingForGroup", { name }) : t("greetingFor", { name });
+    }
     const letter = $("#letter");
     if (letter) letter.textContent = named("letter");
     const rsvpLead = $("#rsvp-lead");
@@ -81,24 +100,45 @@
     const status = $("#rsvp-status");
     const confirmBtn = $("#rsvp-confirm");
     const declineBtn = $("#rsvp-decline");
+    const saveBtn = $("#rsvp-save");
     const changeBtn = $("#rsvp-change");
+    const box = $("#rsvp-party");
     const hasCode = Boolean(state.code);
     const guestOk = Boolean(state.guest && state.guest.ok !== false);
     const canRespond = hasCode && guestOk;
+    const group = isGroup();
     const value = state.guest?.status || "pending";
+    const answered = value !== "pending";
+    const showPicker = canRespond && group && (state.picking || !answered);
 
-    confirmBtn.classList.toggle("is-hidden", !canRespond || value !== "pending");
-    declineBtn.classList.toggle("is-hidden", !canRespond || value !== "pending");
-    changeBtn.classList.toggle("is-hidden", !canRespond || value === "pending");
+    confirmBtn.classList.toggle("is-hidden", !canRespond || showPicker || answered);
+    declineBtn.classList.toggle("is-hidden", !canRespond || showPicker || answered);
+    saveBtn.classList.toggle("is-hidden", !showPicker);
+    changeBtn.classList.toggle("is-hidden", !canRespond || !answered);
+    box.classList.toggle("is-hidden", !showPicker);
 
-    if (canRespond) confirmBtn.textContent = named("rsvpConfirm");
-    else confirmBtn.textContent = t("rsvpConfirm");
+    confirmBtn.textContent = t("rsvpConfirm");
+    declineBtn.textContent = group ? t("rsvpDeclineGroup") : t("rsvpDecline");
+    saveBtn.textContent = t("rsvpSave");
+
+    if (showPicker) renderParty(box);
 
     if (!hasCode) status.textContent = t("rsvpNeedLink");
     else if (!guestOk) status.textContent = t("invalidCode");
     else if (value === "yes") status.textContent = named("rsvpYes");
     else if (value === "no") status.textContent = named("rsvpNo");
+    else if (value === "partial") status.textContent = t("rsvpPartial");
     else status.textContent = named("rsvpPending");
+  }
+
+  function renderParty(box) {
+    const people = partyList();
+    box.innerHTML = `<p class="party-title">${t("rsvpWho")}</p>` + people.map((person) => `
+      <label class="party-item">
+        <input type="checkbox" data-person="${person.id}" ${person.status !== "no" ? "checked" : ""}>
+        <span>${person.name}</span>
+      </label>
+    `).join("");
   }
 
   function playOpenSound() {
@@ -126,6 +166,7 @@
 
   function openEnvelope() {
     if (state.opened) return;
+    ensureGuest();
     const envelope = $("#envelope");
     envelope.classList.add("is-open");
     playOpenSound();
@@ -169,46 +210,97 @@
   function applyGuest(data) {
     if (!data) return;
     if (!data.ok && state.code === "demo") {
-      data = { ok: true, name: "Invitado especial", variant: "completo", status: "pending" };
+      data = {
+        ok: true,
+        name: "Invitado especial",
+        variant: "completo",
+        status: "pending",
+        party: [
+          { id: "1", name: "Invitado especial", role: "titular", status: "pending" },
+          { id: "2", name: "Pedro Castillo", role: "acompanante", status: "pending" },
+        ],
+      };
+    }
+    if (data.ok !== false && !Array.isArray(data.party)) {
+      data.party = [{ id: "1", name: data.name, role: "titular", status: data.status || "pending" }];
     }
     state.guest = data;
     if (data.ok !== false) cacheGuest(data);
     applyLang();
   }
 
-  async function refreshGuest() {
-    if (!state.code) return;
-    if (window.SE.guestReady) {
-      applyGuest(await window.SE.guestReady);
-      return;
-    }
-    if (!config.scriptUrl && !window.SE.scriptUrl) {
-      applyGuest(state.code === "demo"
-        ? { ok: true, name: "Invitado especial", variant: "completo", status: "pending" }
-        : { ok: false });
-      return;
-    }
-    try {
-      applyGuest(await scriptGet({ action: "guest", i: state.code }));
-    } catch {
-      if (!state.guest) applyGuest(state.code === "demo"
-        ? { ok: true, name: "Invitado especial", variant: "completo", status: "pending" }
-        : { ok: false });
-    }
+  async function ensureGuest() {
+    if (!state.code || state.guestRequested) return state.guestReady;
+    state.guestRequested = true;
+    state.guestReady = (async () => {
+      if (!config.scriptUrl && !window.SE.scriptUrl) {
+        applyGuest(state.code === "demo" ? { ok: false } : { ok: false });
+        return;
+      }
+      try {
+        applyGuest(await scriptGet({ action: "guest", i: state.code }));
+      } catch {
+        if (!state.guest) applyGuest(state.code === "demo" ? { ok: false } : { ok: false });
+      }
+    })();
+    return state.guestReady;
   }
 
-  async function sendRsvp(status) {
+  function watchRsvp() {
+    const section = $("#rsvp");
+    if (!section || !("IntersectionObserver" in window)) {
+      ensureGuest();
+      return;
+    }
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        ensureGuest();
+        io.disconnect();
+      }
+    }, { rootMargin: "200px 0px" });
+    io.observe(section);
+  }
+
+  async function sendRsvp(status, people) {
     if (!state.code || !state.guest || state.guest.ok === false) return;
-    const previous = { ...state.guest };
-    applyGuest({ ...state.guest, status });
+    const previous = JSON.parse(JSON.stringify(state.guest));
+    if (people) {
+      const nextParty = partyList().map((person) => ({
+        ...person,
+        status: people[person.id] || "no",
+      }));
+      const yes = nextParty.filter((p) => p.status === "yes").length;
+      const summary = yes === nextParty.length ? "yes" : yes === 0 ? "no" : "partial";
+      applyGuest({ ...state.guest, status: summary, party: nextParty });
+      state.picking = false;
+    } else {
+      applyGuest({
+        ...state.guest,
+        status,
+        party: partyList().map((person) => ({ ...person, status })),
+      });
+      state.picking = false;
+    }
     try {
-      const data = await scriptGet({ action: "rsvp", i: state.code, status });
+      const payload = { action: "rsvp", i: state.code, status };
+      if (people) {
+        payload.p = Object.entries(people).map(([id, value]) => `${id}:${value}`).join("|");
+      }
+      const data = await scriptGet(payload);
       if (!data.ok) throw new Error("rsvp");
       applyGuest(data);
     } catch {
       applyGuest(previous);
       $("#rsvp-status").textContent = t("rsvpError");
     }
+  }
+
+  function saveParty() {
+    const people = {};
+    $$("#rsvp-party [data-person]").forEach((input) => {
+      people[input.dataset.person] = input.checked ? "yes" : "no";
+    });
+    sendRsvp("yes", people);
   }
 
   function revealPayment() {
@@ -240,9 +332,24 @@
       localStorage.setItem("se-lang", state.lang);
       applyLang();
     });
-    $("#rsvp-confirm").addEventListener("click", () => sendRsvp("yes"));
+    $("#rsvp-confirm").addEventListener("click", () => {
+      if (isGroup()) {
+        state.picking = true;
+        renderRsvp();
+        return;
+      }
+      sendRsvp("yes");
+    });
     $("#rsvp-decline").addEventListener("click", () => sendRsvp("no"));
-    $("#rsvp-change").addEventListener("click", () => sendRsvp("pending"));
+    $("#rsvp-save").addEventListener("click", saveParty);
+    $("#rsvp-change").addEventListener("click", () => {
+      if (isGroup()) {
+        state.picking = true;
+        renderRsvp();
+        return;
+      }
+      sendRsvp("pending");
+    });
   }
 
   function init() {
@@ -255,7 +362,7 @@
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       skipEnvelope();
     }
-    refreshGuest();
+    watchRsvp();
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
