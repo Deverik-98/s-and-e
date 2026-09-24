@@ -9,7 +9,6 @@
 
 var SHEET_NAME = "Invitados";
 var TZ = "America/Caracas";
-var DATE_FMT = "dd/MM/yyyy h:mm a";
 var ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
 var CODE_LEN = 6;
 var HEADERS = ["Código", "Nombre", "Tipo", "Estado", "Actualizado", "Creado"];
@@ -24,7 +23,7 @@ function doGet(e) {
   var out;
 
   if (action === "guest") out = getGuest(code);
-  else if (action === "rsvp") out = setRsvp(code, p.status);
+  else if (action === "rsvp") out = setRsvp(code, fromSheetStatus_(p.status));
   else out = { ok: false, error: "unknown_action" };
 
   return ContentService
@@ -48,8 +47,8 @@ function actualizarHoja() {
     if (!row[0]) continue;
     row[2] = toSheetVariant_(row[2]);
     row[3] = toSheetStatus_(fromSheetStatus_(row[3]));
-    row[4] = toDate_(row[4]);
-    row[5] = toDate_(row[5]);
+    row[4] = formatCaracas_(row[4]);
+    row[5] = formatCaracas_(row[5]);
   }
 
   sh.getRange(1, 1, values.length, HEADERS.length).setValues(
@@ -60,6 +59,15 @@ function actualizarHoja() {
 
 function initSheet() {
   actualizarHoja();
+}
+
+function limpiarHoja() {
+  var sh = sheet_();
+  var last = sh.getLastRow();
+  if (last > 1) sh.deleteRows(2, last - 1);
+  sh.clearConditionalFormatRules();
+  sh.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
+  applyStyles_(sh);
 }
 
 function seedDemo() {
@@ -101,11 +109,12 @@ function addGuest(name, variant) {
     code,
     name,
     toSheetVariant_(variant || "completo"),
-    STATUS_SHEET.pending,
+    toSheetStatus_("pending"),
     "",
-    now,
+    formatCaracas_(now),
   ]);
   applyStyles_(sh);
+  paintRow_(sh, sh.getLastRow(), "pending");
   return {
     ok: true,
     code: code,
@@ -125,12 +134,18 @@ function getGuest(code) {
 }
 
 function setRsvp(code, status) {
+  status = fromSheetStatus_(status);
   if (!STATUS_SHEET[status]) return { ok: false, error: "bad_status" };
   var row = find_(code);
   if (!row) return { ok: false, error: "not_found" };
   var sh = sheet_();
-  sh.getRange(row.index, 4, 1, 2).setValues([[STATUS_SHEET[status], status === "pending" ? "" : new Date()]]);
-  applyStyles_(sh);
+  sh.getRange(row.index, 4, 1, 2)
+    .setNumberFormat("@")
+    .setValues([[
+      toSheetStatus_(status),
+      status === "pending" ? "" : formatCaracas_(new Date()),
+    ]]);
+  paintRow_(sh, row.index, status);
   return {
     ok: true,
     name: row.name,
@@ -204,10 +219,23 @@ function toSheetVariant_(variant) {
 }
 
 function toDate_(value) {
-  if (!value) return "";
+  if (!value) return null;
   if (Object.prototype.toString.call(value) === "[object Date]" && !isNaN(value.getTime())) return value;
   var parsed = new Date(value);
-  return isNaN(parsed.getTime()) ? "" : parsed;
+  return isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function formatCaracas_(value) {
+  var date = toDate_(value);
+  if (!date) return "";
+  return Utilities.formatDate(date, TZ, "dd/MM/yyyy h:mm a")
+    .replace("AM", "a. m.")
+    .replace("PM", "p. m.");
+}
+
+function paintRow_(sh, index, status) {
+  var colors = { yes: "#d9ead3", no: "#f4cccc", pending: "#fff2cc" };
+  sh.getRange(index, 1, 1, HEADERS.length).setBackground(colors[status] || "#fff2cc");
 }
 
 function applyStyles_(sh) {
@@ -228,29 +256,28 @@ function applyStyles_(sh) {
   sh.setColumnWidth(4, 130);
   sh.setColumnWidth(5, 170);
   sh.setColumnWidth(6, 170);
-  sh.getRange(2, 5, lastRow - 1, 2).setNumberFormat(DATE_FMT);
+  sh.getRange(2, 5, lastRow - 1, 2).setNumberFormat("@");
   sh.getRange(2, 1, lastRow - 1, HEADERS.length)
     .setFontFamily("Arial")
     .setVerticalAlignment("middle");
 
   var data = sh.getRange(2, 1, lastRow - 1, HEADERS.length);
   sh.setConditionalFormatRules([
-    SpreadsheetApp.newConditionalFormatRule()
-      .whenFormulaSatisfied('=$D2="Confirmado"')
-      .setBackground("#d9ead3")
-      .setRanges([data])
-      .build(),
-    SpreadsheetApp.newConditionalFormatRule()
-      .whenFormulaSatisfied('=$D2="No asiste"')
-      .setBackground("#f4cccc")
-      .setRanges([data])
-      .build(),
-    SpreadsheetApp.newConditionalFormatRule()
-      .whenFormulaSatisfied('=$D2="Pendiente"')
-      .setBackground("#fff2cc")
-      .setRanges([data])
-      .build(),
+    rule_('=$D2="Confirmado"', data, "#d9ead3"),
+    rule_('=$D2="yes"', data, "#d9ead3"),
+    rule_('=$D2="No asiste"', data, "#f4cccc"),
+    rule_('=$D2="no"', data, "#f4cccc"),
+    rule_('=$D2="Pendiente"', data, "#fff2cc"),
+    rule_('=$D2="pending"', data, "#fff2cc"),
   ]);
+}
+
+function rule_(formula, range, color) {
+  return SpreadsheetApp.newConditionalFormatRule()
+    .whenFormulaSatisfied(formula)
+    .setBackground(color)
+    .setRanges([range])
+    .build();
 }
 
 function onOpen() {
@@ -260,5 +287,6 @@ function onOpen() {
     .addItem("Ver enlaces", "listInviteUrls")
     .addItem("Crear invitado de prueba", "seedDemo")
     .addItem("Actualizar hoja (español y estilos)", "actualizarHoja")
+    .addItem("Limpiar invitados", "limpiarHoja")
     .addToUi();
 }
