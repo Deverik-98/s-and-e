@@ -35,5 +35,13 @@ SE.config = {
   },
   scriptUrl: "",
   codeParam: "i",
+  inviteSlug: "nos-casamos",
+  inviteSlugs: ["nos-casamos", "te-invitamos-a-nuestra-boda"],
   pagesUrl: "https://deverik-98.github.io/s-and-e/",
+};
+
+SE.inviteUrl = function inviteUrl(code) {
+  const base = SE.config.pagesUrl.replace(/\/+$/, "");
+  const slug = SE.config.inviteSlug;
+  return `${base}/${slug}/${encodeURIComponent(code)}`;
 };

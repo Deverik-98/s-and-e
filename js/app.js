@@ -6,10 +6,22 @@
   const state = {
     lang: localStorage.getItem("se-lang") || ((navigator.language || "es").startsWith("en") ? "en" : "es"),
     guest: null,
-    code: new URLSearchParams(location.search).get(config.codeParam || "i") || "",
+    code: readInviteCode(),
     opened: sessionStorage.getItem("se-opened") === "1",
     busy: false,
   };
+
+  function readInviteCode() {
+    const fromQuery = new URLSearchParams(location.search).get(config.codeParam || "i");
+    if (fromQuery) return fromQuery.trim();
+
+    const reserved = new Set([...(config.inviteSlugs || []), "s-and-e", "index.html", "404.html"]);
+    const parts = location.pathname.split("/").filter(Boolean);
+    if (parts[0] === "s-and-e") parts.shift();
+    const last = parts[parts.length - 1] || "";
+    if (!last || reserved.has(last)) return "";
+    return decodeURIComponent(last);
+  }
 
   const t = (key, vars = {}) => {
     const table = i18n[state.lang] || i18n.es;

@@ -8,7 +8,7 @@
  *    - Quién tiene acceso: Cualquier persona
  * 4. Copia la URL de la app en js/config.js → scriptUrl
  *
- * Enlaces: https://deverik-98.github.io/s-and-e/?i=CODIGO
+ * Enlaces: https://deverik-98.github.io/s-and-e/nos-casamos/CODIGO
  * El código es opaco (no correlativo) y corto.
  */
 
@@ -47,7 +47,7 @@ function addGuest(name, variant) {
   return {
     ok: true,
     code: code,
-    url: "https://deverik-98.github.io/s-and-e/?i=" + code,
+    url: "https://deverik-98.github.io/s-and-e/nos-casamos/" + code,
   };
 }
 
