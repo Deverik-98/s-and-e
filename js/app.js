@@ -7,7 +7,7 @@
     lang: localStorage.getItem("se-lang") || ((navigator.language || "es").startsWith("en") ? "en" : "es"),
     guest: window.SE.cachedGuest && window.SE.cachedGuest.ok !== false ? window.SE.cachedGuest : null,
     code: window.SE.code || readInviteCode(),
-    opened: sessionStorage.getItem("se-opened") === "1",
+    opened: false,
   };
 
   function readInviteCode() {
@@ -133,7 +133,6 @@
       $("#envelope-screen").classList.add("is-gone");
       $("#site").classList.add("is-visible");
       document.body.classList.remove("is-locked");
-      sessionStorage.setItem("se-opened", "1");
       state.opened = true;
     }, 980);
   }
@@ -253,7 +252,7 @@
     revealPayment();
     tick();
     window.setInterval(tick, 1000);
-    if (state.opened || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       skipEnvelope();
     }
     refreshGuest();
