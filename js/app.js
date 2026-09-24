@@ -10,6 +10,8 @@
     opened: false,
     picking: false,
     guestRequested: false,
+    muted: localStorage.getItem("se-muted") === "1",
+    musicReady: false,
   };
 
   function readInviteCode() {
@@ -87,6 +89,11 @@
     }
     $("#lang-toggle").textContent = t("langSwitch");
     $("#lang-toggle").setAttribute("aria-label", t("langLabel"));
+    const muteBtn = $("#mute-toggle");
+    if (muteBtn) {
+      muteBtn.textContent = state.muted ? "♪" : "♫";
+      muteBtn.setAttribute("aria-label", state.muted ? t("unmute") : t("mute"));
+    }
     renderRsvp();
     toggleDinner();
   }
@@ -141,6 +148,25 @@
     `).join("");
   }
 
+  function startMusic() {
+    const audio = $("#ambiente");
+    const src = config.audio;
+    if (!audio || !src || state.musicReady === "missing") return;
+    if (!audio.src) {
+      audio.src = src;
+      audio.addEventListener("error", () => {
+        state.musicReady = "missing";
+        $("#mute-toggle")?.classList.add("is-hidden");
+      }, { once: true });
+    }
+    audio.muted = state.muted;
+    audio.volume = 0.55;
+    audio.play().then(() => {
+      state.musicReady = true;
+      $("#mute-toggle")?.classList.remove("is-hidden");
+    }).catch(() => {});
+  }
+
   function playOpenSound() {
     const file = $("#sfx-open");
     if (file && file.currentSrc && file.readyState >= 2) {
@@ -170,6 +196,7 @@
     const envelope = $("#envelope");
     envelope.classList.add("is-open");
     playOpenSound();
+    startMusic();
     window.setTimeout(() => {
       $("#envelope-screen").classList.add("is-gone");
       $("#site").classList.add("is-visible");
@@ -326,6 +353,13 @@
         e.preventDefault();
         openEnvelope();
       }
+    });
+    $("#mute-toggle").addEventListener("click", () => {
+      state.muted = !state.muted;
+      localStorage.setItem("se-muted", state.muted ? "1" : "0");
+      const audio = $("#ambiente");
+      if (audio) audio.muted = state.muted;
+      applyLang();
     });
     $("#lang-toggle").addEventListener("click", () => {
       state.lang = state.lang === "es" ? "en" : "es";

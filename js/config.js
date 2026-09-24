@@ -33,6 +33,7 @@ SE.config = {
     holder: "Stefany Gutierrez / Erikson Pacheco",
     qr: "",
   },
+  audio: "assets/audio/ambiente.m4a",
   scriptUrl: "https://script.google.com/macros/s/AKfycbxQzrA-d-0ESODYfs0DlGn0t6JeA2XjCNi0YDXUXWMKAVEsfwcOUKOjRkwp2XyYW6z_jQ/exec",
   codeParam: "i",
   inviteSlug: "nos-casamos",
