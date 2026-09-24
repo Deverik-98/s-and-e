@@ -115,6 +115,7 @@ function addGuest(name, variant) {
   ]);
   applyStyles_(sh);
   paintRow_(sh, sh.getLastRow(), "pending");
+  CacheService.getScriptCache().remove("g:" + code);
   return {
     ok: true,
     code: code,
@@ -123,14 +124,20 @@ function addGuest(name, variant) {
 }
 
 function getGuest(code) {
+  var cache = CacheService.getScriptCache();
+  var key = "g:" + code;
+  var hit = cache.get(key);
+  if (hit) return JSON.parse(hit);
   var row = find_(code);
   if (!row) return { ok: false, error: "not_found" };
-  return {
+  var out = {
     ok: true,
     name: row.name,
     variant: row.variant,
     status: row.status,
   };
+  cache.put(key, JSON.stringify(out), 180);
+  return out;
 }
 
 function setRsvp(code, status) {
@@ -146,6 +153,7 @@ function setRsvp(code, status) {
       status === "pending" ? "" : formatCaracas_(new Date()),
     ]]);
   paintRow_(sh, row.index, status);
+  CacheService.getScriptCache().remove("g:" + code);
   return {
     ok: true,
     name: row.name,

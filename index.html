@@ -6,6 +6,20 @@
       window.SE = window.SE || {};
       SE.base = /github\.io$/i.test(location.hostname) ? "/s-and-e/" : "/";
       document.head.appendChild(Object.assign(document.createElement("base"), { href: SE.base }));
+      SE.scriptUrl = "https://script.google.com/macros/s/AKfycbxQzrA-d-0ESODYfs0DlGn0t6JeA2XjCNi0YDXUXWMKAVEsfwcOUKOjRkwp2XyYW6z_jQ/exec";
+      (function () {
+        var reserved = { "s-and-e": 1, "nos-casamos": 1, "te-invitamos-a-nuestra-boda": 1, "index.html": 1, "404.html": 1 };
+        var q = new URLSearchParams(location.search).get("i");
+        var parts = location.pathname.split("/").filter(Boolean);
+        if (parts[0] === "s-and-e") parts.shift();
+        var last = parts[parts.length - 1] || "";
+        SE.code = (q || (!reserved[last] ? decodeURIComponent(last) : "")).trim();
+        if (!SE.code) return;
+        try { SE.cachedGuest = JSON.parse(localStorage.getItem("se-guest:" + SE.code) || "null"); } catch (e) {}
+        SE.guestReady = fetch(SE.scriptUrl + "?action=guest&i=" + encodeURIComponent(SE.code))
+          .then(function (r) { return r.json(); })
+          .catch(function () { return null; });
+      })();
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#0A2A6B">
@@ -16,8 +30,11 @@
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://script.google.com">
+    <link rel="preconnect" href="https://script.googleusercontent.com">
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap"></noscript>
   </head>
   <body>
     <a class="skip" href="#site">Skip</a>

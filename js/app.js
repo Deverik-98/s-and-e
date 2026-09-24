@@ -5,10 +5,9 @@
 
   const state = {
     lang: localStorage.getItem("se-lang") || ((navigator.language || "es").startsWith("en") ? "en" : "es"),
-    guest: null,
-    code: readInviteCode(),
+    guest: window.SE.cachedGuest && window.SE.cachedGuest.ok !== false ? window.SE.cachedGuest : null,
+    code: window.SE.code || readInviteCode(),
     opened: sessionStorage.getItem("se-opened") === "1",
-    busy: false,
   };
 
   function readInviteCode() {
@@ -21,6 +20,11 @@
     const last = parts[parts.length - 1] || "";
     if (!last || reserved.has(last)) return "";
     return decodeURIComponent(last);
+  }
+
+  function cacheGuest(guest) {
+    if (!state.code || !guest) return;
+    try { localStorage.setItem("se-guest:" + state.code, JSON.stringify(guest)); } catch {}
   }
 
   const t = (key, vars = {}) => {
@@ -158,54 +162,54 @@
   }
 
   function scriptGet(params) {
-    const url = new URL(config.scriptUrl);
+    const url = new URL(config.scriptUrl || window.SE.scriptUrl);
     Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
     return fetch(url.toString(), { method: "GET" }).then((r) => r.json());
   }
 
-  async function loadGuest() {
-    if (!state.code) {
-      state.guest = null;
+  function applyGuest(data) {
+    if (!data) return;
+    if (!data.ok && state.code === "demo") {
+      data = { ok: true, name: "Invitado especial", variant: "completo", status: "pending" };
+    }
+    state.guest = data;
+    if (data.ok !== false) cacheGuest(data);
+    applyLang();
+  }
+
+  async function refreshGuest() {
+    if (!state.code) return;
+    if (window.SE.guestReady) {
+      applyGuest(await window.SE.guestReady);
       return;
     }
-    if (!config.scriptUrl) {
-      state.guest = { name: state.code === "demo" ? "Invitado especial" : "", variant: "completo", status: "pending", ok: state.code === "demo" };
-      if (state.code !== "demo") state.guest = { ok: false };
+    if (!config.scriptUrl && !window.SE.scriptUrl) {
+      applyGuest(state.code === "demo"
+        ? { ok: true, name: "Invitado especial", variant: "completo", status: "pending" }
+        : { ok: false });
       return;
     }
     try {
-      const data = await scriptGet({ action: "guest", i: state.code });
-      if (!data.ok && state.code === "demo") {
-        state.guest = { ok: true, name: "Invitado especial", variant: "completo", status: "pending" };
-        return;
-      }
-      state.guest = data;
+      applyGuest(await scriptGet({ action: "guest", i: state.code }));
     } catch {
-      state.guest = state.code === "demo"
+      if (!state.guest) applyGuest(state.code === "demo"
         ? { ok: true, name: "Invitado especial", variant: "completo", status: "pending" }
-        : { ok: false };
+        : { ok: false });
     }
   }
 
   async function sendRsvp(status) {
-    if (!state.code || state.busy) return;
-    state.busy = true;
-    renderRsvp();
+    if (!state.code || !state.guest || state.guest.ok === false) return;
+    const previous = { ...state.guest };
+    applyGuest({ ...state.guest, status });
     try {
-      if (config.scriptUrl) {
-        const data = await scriptGet({ action: "rsvp", i: state.code, status });
-        if (!data.ok) throw new Error("rsvp");
-        state.guest = data;
-      } else if (state.guest) {
-        state.guest.status = status;
-      }
+      const data = await scriptGet({ action: "rsvp", i: state.code, status });
+      if (!data.ok) throw new Error("rsvp");
+      applyGuest(data);
     } catch {
+      applyGuest(previous);
       $("#rsvp-status").textContent = t("rsvpError");
-      state.busy = false;
-      return;
     }
-    state.busy = false;
-    renderRsvp();
   }
 
   function revealPayment() {
@@ -242,10 +246,9 @@
     $("#rsvp-change").addEventListener("click", () => sendRsvp("pending"));
   }
 
-  async function init() {
+  function init() {
     document.body.classList.add("is-locked");
     bind();
-    await loadGuest();
     applyLang();
     revealPayment();
     tick();
@@ -253,6 +256,7 @@
     if (state.opened || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       skipEnvelope();
     }
+    refreshGuest();
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
