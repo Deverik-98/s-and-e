@@ -384,7 +384,7 @@ function applyStyles_(sh) {
     .setFontFamily("Arial")
     .setFontWeight("bold")
     .setFontColor("#ffffff")
-    .setBackground("#0A2A6B")
+    .setBackground("#5A0F1B")
     .setHorizontalAlignment("center");
   sh.setFrozenRows(1);
   sh.setRowHeight(1, 32);
@@ -410,7 +410,7 @@ function applyPeopleStyles_(sh) {
     .setFontFamily("Arial")
     .setFontWeight("bold")
     .setFontColor("#ffffff")
-    .setBackground("#0A2A6B")
+    .setBackground("#5A0F1B")
     .setHorizontalAlignment("center");
   sh.setFrozenRows(1);
   sh.setColumnWidth(1, 110);
