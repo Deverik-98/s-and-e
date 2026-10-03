@@ -23,9 +23,11 @@ SE.config = {
     },
   },
   schedule: [
-    { time: "16:00", key: "church" },
-    { time: "18:00", key: "dinner" },
-    { time: "20:00", key: "close" },
+    { time: "4 PM", key: "ceremony" },
+    { time: "6 PM", key: "toast" },
+    { time: "7 PM", key: "dinner" },
+    { time: "8 PM", key: "cake" },
+    { time: "8 PM", key: "farewell" },
   ],
   payment: {
     bank: "",

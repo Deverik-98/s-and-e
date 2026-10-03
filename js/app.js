@@ -8,6 +8,8 @@
     guest: window.SE.cachedGuest && window.SE.cachedGuest.ok !== false ? window.SE.cachedGuest : null,
     code: window.SE.code || readInviteCode(),
     opened: false,
+    opening: false,
+    audioUnlocked: false,
     picking: false,
     guestRequested: false,
     muted: localStorage.getItem("se-muted") === "1",
@@ -91,7 +93,7 @@
     $("#lang-toggle").setAttribute("aria-label", t("langLabel"));
     const muteBtn = $("#mute-toggle");
     if (muteBtn) {
-      muteBtn.textContent = state.muted ? "♪" : "♫";
+      muteBtn.classList.toggle("is-paused", state.muted || $("#ambiente")?.paused);
       muteBtn.setAttribute("aria-label", state.muted ? t("unmute") : t("mute"));
     }
     renderRsvp();
@@ -101,6 +103,69 @@
   function toggleDinner() {
     const hideDinner = state.guest?.variant === "iglesia";
     $$("[data-dinner]").forEach((el) => el.classList.toggle("is-hidden", hideDinner));
+    markTimelineEnds();
+    updateTimelineRose();
+  }
+
+  function visibleTimelineItems() {
+    return $$(".timeline li").filter((li) => !li.classList.contains("is-hidden"));
+  }
+
+  function markTimelineEnds() {
+    const items = $$(".timeline li");
+    items.forEach((li) => li.classList.remove("is-last"));
+    const visible = visibleTimelineItems();
+    visible[visible.length - 1]?.classList.add("is-last");
+  }
+
+  function timelineRoseRange() {
+    const wrap = $(".timeline-wrap");
+    const rose = $(".timeline-rose");
+    const items = visibleTimelineItems();
+    if (!wrap || !rose || !items.length) return { start: 0, end: 0 };
+    const markerOffset = 14; // matches li::after top
+    const roseMid = rose.offsetHeight / 2 || 22;
+    const start = items[0].offsetTop + markerOffset - roseMid;
+    const end = items[items.length - 1].offsetTop + markerOffset - roseMid;
+    return { start: Math.max(0, start), end: Math.max(0, end) };
+  }
+
+  function timelineScrollProgress() {
+    const section = $(".schedule-section");
+    if (!section) return 0;
+    const rect = section.getBoundingClientRect();
+    const view = window.innerHeight || 1;
+    // Scrub while the schedule block crosses the viewport (Tilda-like scroll SBS)
+    const start = view * 0.72;
+    const end = view * 0.28;
+    const t = (start - rect.top) / (start - end + rect.height * 0.55);
+    return Math.min(1, Math.max(0, t));
+  }
+
+  function updateTimelineRose() {
+    const rose = $(".timeline-rose");
+    if (!rose) return;
+    const { start, end } = timelineRoseRange();
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const progress = reduce ? 0 : timelineScrollProgress();
+    const y = start + (end - start) * progress;
+    rose.style.setProperty("--rose-y", `${y}px`);
+  }
+
+  function bindTimelineRose() {
+    markTimelineEnds();
+    updateTimelineRose();
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        updateTimelineRose();
+        ticking = false;
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
   }
 
   function renderRsvp() {
@@ -148,23 +213,41 @@
     `).join("");
   }
 
-  function startMusic() {
+  function prepareMusic() {
     const audio = $("#ambiente");
     const src = config.audio;
-    if (!audio || !src || state.musicReady === "missing") return;
-    if (!audio.src) {
+    if (!audio || !src || state.musicReady === "missing") return audio;
+    if (!audio.getAttribute("src") && !audio.querySelector("source")) {
       audio.src = src;
-      audio.addEventListener("error", () => {
-        state.musicReady = "missing";
-        $("#mute-toggle")?.classList.add("is-hidden");
-      }, { once: true });
     }
-    audio.muted = state.muted;
-    audio.volume = 0.55;
-    audio.play().then(() => {
-      state.musicReady = true;
-      $("#mute-toggle")?.classList.remove("is-hidden");
-    }).catch(() => {});
+    audio.loop = true;
+    audio.preload = "auto";
+    try { audio.load(); } catch {}
+    return audio;
+  }
+
+  function showAudioFab() {
+    const btn = $("#mute-toggle");
+    if (!btn) return;
+    btn.classList.add("is-ready");
+    applyLang();
+  }
+
+  function startMusic() {
+    const audio = prepareMusic();
+    if (!audio) return;
+    state.audioUnlocked = true;
+    audio.muted = false;
+    state.muted = false;
+    localStorage.setItem("se-muted", "0");
+    audio.volume = 1;
+    const play = audio.play();
+    if (play && play.then) {
+      play.then(() => {
+        state.musicReady = true;
+        applyLang();
+      }).catch(() => {});
+    }
   }
 
   function playOpenSound() {
@@ -190,25 +273,119 @@
     osc.stop(now + 0.72);
   }
 
-  function openEnvelope() {
+  function unlockAudio() {
+    if (state.audioUnlocked || state.opening || state.opened) return;
+    const audio = prepareMusic();
+    if (!audio) return;
+    const p = audio.play();
+    if (p && p.then) {
+      p.then(() => {
+        if (state.opening || state.opened) return;
+        audio.pause();
+        audio.currentTime = 0;
+        state.audioUnlocked = true;
+      }).catch(() => {});
+    }
+  }
+
+  function playHero() {
+    const hero = $("#hero-video");
+    if (!hero) return;
+    hero.muted = true;
+    const play = hero.play();
+    if (play && play.catch) play.catch(() => {});
+  }
+
+  function setScrollLock(on) {
+    document.documentElement.classList.toggle("is-locked", on);
+    document.body.classList.toggle("is-locked", on);
+    if (on) window.scrollTo(0, 0);
+  }
+
+  function unlockScrollAfterEnvelope(overlay) {
+    window.scrollTo(0, 0);
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      window.scrollTo(0, 0);
+      setScrollLock(false);
+    };
+    const onEnd = (e) => {
+      if (e.target !== overlay) return;
+      if (e.propertyName && e.propertyName !== "opacity") return;
+      finish();
+    };
+    overlay.addEventListener("transitionend", onEnd);
+    window.setTimeout(finish, 1600);
+  }
+
+  function revealInvitation() {
     if (state.opened) return;
-    ensureGuest();
-    const envelope = $("#envelope");
-    envelope.classList.add("is-open");
-    playOpenSound();
+    state.opened = true;
+    window.scrollTo(0, 0);
+    const overlay = $("#envelope-screen");
+    overlay.classList.add("is-gone");
+    $("#site").classList.add("is-visible");
+    // Keep scroll locked until the envelope fade fully finishes
+    unlockScrollAfterEnvelope(overlay);
+    showAudioFab();
+    playHero();
+    applyLang();
+    markTimelineEnds();
+    requestAnimationFrame(updateTimelineRose);
+  }
+
+  function playOpenVideo(video) {
+    const overlay = $("#envelope-screen");
+    overlay.classList.add("is-playing");
+    try { video.currentTime = 0; } catch {}
+    const play = video.play();
+    if (play && play.catch) {
+      play.catch(() => {
+        playOpenSound();
+        window.setTimeout(revealInvitation, 700);
+      });
+    }
+  }
+
+  function openEnvelope() {
+    if (state.opened || state.opening) return;
+    state.opening = true;
+    window.scrollTo(0, 0);
+    setScrollLock(true);
     startMusic();
+    ensureGuest();
+    const tap = $("#tap-wrap");
+    if (tap) tap.classList.add("is-hidden");
+    const video = $("#open-video");
+    if (!video) {
+      playOpenSound();
+      window.setTimeout(revealInvitation, 800);
+      return;
+    }
+    // Fade invitation in before ~4s (open clip keeps playing underneath)
+    window.setTimeout(revealInvitation, 4500);
+    if (video.readyState >= 2) {
+      playOpenVideo(video);
+      return;
+    }
+    video.addEventListener("canplay", () => playOpenVideo(video), { once: true });
+    video.load();
     window.setTimeout(() => {
-      $("#envelope-screen").classList.add("is-gone");
-      $("#site").classList.add("is-visible");
-      document.body.classList.remove("is-locked");
-      state.opened = true;
-    }, 980);
+      if (!state.opened && video.paused) playOpenVideo(video);
+    }, 700);
   }
 
   function skipEnvelope() {
-    $("#envelope-screen").classList.add("is-gone");
+    state.opened = true;
+    window.scrollTo(0, 0);
+    const overlay = $("#envelope-screen");
+    overlay.classList.add("is-gone");
     $("#site").classList.add("is-visible");
-    document.body.classList.remove("is-locked");
+    unlockScrollAfterEnvelope(overlay);
+    showAudioFab();
+    playHero();
   }
 
   function tick() {
@@ -347,19 +524,59 @@
   }
 
   function bind() {
-    $("#envelope").addEventListener("click", openEnvelope);
-    $("#envelope").addEventListener("keydown", (e) => {
+    const blockScroll = (e) => {
+      if (!document.body.classList.contains("is-locked")) return;
+      e.preventDefault();
+    };
+    window.addEventListener("wheel", blockScroll, { passive: false });
+    window.addEventListener("touchmove", blockScroll, { passive: false });
+    window.addEventListener("scroll", () => {
+      if (document.body.classList.contains("is-locked") && window.scrollY !== 0) {
+        window.scrollTo(0, 0);
+      }
+    }, { passive: true });
+
+    const overlay = $("#envelope-screen");
+    overlay.addEventListener("touchstart", unlockAudio, { passive: true });
+    overlay.addEventListener("click", openEnvelope);
+    overlay.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         openEnvelope();
       }
     });
+    const openVideo = $("#open-video");
+    if (openVideo) {
+      openVideo.addEventListener("timeupdate", () => {
+        // Start fade a bit earlier so opacity is gone around ~4s
+        if (openVideo.currentTime >= 3.35) {
+          revealInvitation();
+        }
+      });
+      openVideo.addEventListener("ended", revealInvitation);
+      openVideo.addEventListener("error", () => window.setTimeout(revealInvitation, 600));
+    }
     $("#mute-toggle").addEventListener("click", () => {
-      state.muted = !state.muted;
-      localStorage.setItem("se-muted", state.muted ? "1" : "0");
       const audio = $("#ambiente");
-      if (audio) audio.muted = state.muted;
+      if (!audio) return;
+      if (audio.paused) {
+        state.muted = false;
+        audio.muted = false;
+        audio.play().catch(() => {});
+      } else {
+        state.muted = true;
+        audio.pause();
+      }
+      localStorage.setItem("se-muted", state.muted ? "1" : "0");
       applyLang();
+    });
+    $("#rsvp-seal")?.addEventListener("click", () => {
+      const confirmBtn = $("#rsvp-confirm");
+      if (confirmBtn && !confirmBtn.classList.contains("is-hidden") && !confirmBtn.disabled) {
+        confirmBtn.click();
+        return;
+      }
+      $("#rsvp-change")?.click();
     });
     $("#lang-toggle").addEventListener("click", () => {
       state.lang = state.lang === "es" ? "en" : "es";
@@ -387,10 +604,12 @@
   }
 
   function init() {
-    document.body.classList.add("is-locked");
+    setScrollLock(true);
+    prepareMusic();
     bind();
     applyLang();
     revealPayment();
+    bindTimelineRose();
     tick();
     window.setInterval(tick, 1000);
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {

@@ -25,111 +25,178 @@
     <meta property="og:description" content="Te invitamos a celebrar nuestra boda">
     <title>Stefany & Erikson — 25.12.2026</title>
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="preload" as="image" href="assets/img/paper-hero.webp">
+    <link rel="preload" as="image" href="assets/img/floral-left.webp">
+    <link rel="preload" as="image" href="assets/img/floral-right.webp">
+    <link rel="preload" as="image" href="assets/img/sobre.jpg">
+    <link rel="preload" as="video" href="assets/video/abrir.mp4?v=4">
+    <link rel="preload" as="audio" href="assets/audio/ambiente.m4a">
+    <link rel="preload" as="font" href="assets/fonts/GreatVibes-Regular.ttf" type="font/ttf" crossorigin>
+    <link rel="preload" as="font" href="assets/fonts/PinyonScript-Regular.ttf" type="font/ttf" crossorigin>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://script.google.com">
     <link rel="preconnect" href="https://script.googleusercontent.com">
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" media="print" onload="this.media='all'">
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap"></noscript>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500;1,600&family=Ovo&display=swap">
+    <link rel="stylesheet" href="css/styles.css?v=23">
   </head>
   <body>
     <a class="skip" href="#site">Skip</a>
 
     <div class="topbar">
-      <button id="mute-toggle" class="ghost is-hidden" type="button" aria-label="Silenciar">♪</button>
       <button id="lang-toggle" class="ghost" type="button" aria-label="English">EN</button>
     </div>
 
-    <section id="envelope-screen" class="envelope-screen" aria-label="Invitación">
-      <div class="envelope-wrap">
-        <p id="guest-chip" class="guest-chip is-hidden"></p>
-        <div id="envelope" class="envelope" role="button" tabindex="0" aria-label="Abrir invitación">
-          <div class="panel back"></div>
-          <div class="letter">
-            <div>
-              <strong>Stefany &amp; Erikson</strong>
-              <span>25.12.26</span>
-            </div>
-          </div>
-          <div class="panel front"></div>
-          <div class="flap"></div>
-          <div class="seal">S&amp;E</div>
+    <section id="envelope-screen" class="envelope-screen" role="button" tabindex="0" aria-label="Invitación">
+      <p id="guest-chip" class="guest-chip is-hidden"></p>
+      <div class="open-stage">
+        <img id="wei-img" class="open-still" src="assets/img/sobre.jpg" alt="Abrir invitación" draggable="false">
+        <video id="open-video" class="open-video" muted playsinline preload="auto" poster="assets/img/sobre.jpg">
+          <source src="assets/video/abrir.mp4?v=4" type="video/mp4">
+        </video>
+        <div id="tap-wrap" class="tap-wrap">
+          <div class="wei-chevron" aria-hidden="true"></div>
+          <p class="open-hint" data-i18n="openHint">Toca para abrir</p>
         </div>
-        <p class="open-hint" data-i18n="openHint">Toca para abrir</p>
       </div>
     </section>
 
+    <button id="mute-toggle" class="audio-fab" type="button" aria-label="Silenciar">
+      <svg id="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"></rect><rect x="14" y="5" width="4" height="14" rx="1"></rect></svg>
+      <svg id="icon-play" viewBox="0 0 24 24" aria-hidden="true"><polygon points="5,3 19,12 5,21"></polygon></svg>
+    </button>
+
     <main id="site" class="site">
       <header class="hero">
-        <p class="kicker" data-i18n="saveTheDate">Nuestra boda</p>
-        <h1 class="names">Stefany <span class="amp">&amp;</span> Erikson</h1>
-        <p class="hero-date" data-i18n="dateLine">25 de diciembre de 2026 · 4:00 p. m.</p>
-        <p class="hero-city" data-i18n="cityLine">San Felipe, Yaracuy</p>
-        <div class="divider"></div>
-        <p id="greeting" class="letter-copy"></p>
-        <p id="letter" class="letter-copy"></p>
-        <span class="scroll-cue" data-i18n="scroll">Desliza</span>
+        <div class="board hero-board">
+          <video id="hero-video" class="hero-video" muted loop playsinline preload="auto" poster="assets/img/hero.jpg">
+            <source src="assets/video/cisnes.mp4?v=3" type="video/mp4">
+          </video>
+          <div class="hero-glow" aria-hidden="true"></div>
+          <p class="kicker" data-i18n="saveTheDate">Nuestra boda</p>
+          <p class="hero-date" data-i18n="dateLine">25 de diciembre de 2026 · 4:00 p. m.</p>
+          <h1 class="names"><span>Stefany</span><span class="amp">&amp;</span><span>Erikson</span></h1>
+          <div class="scroll-block">
+            <span class="scroll-cue" data-i18n="scroll">Desliza</span>
+            <svg class="scroll-chevron" viewBox="0 0 25 16" aria-hidden="true"><path fill="none" stroke="#937100" stroke-width="1" stroke-linecap="round" d="M1 1c3.4 4.4 8.1 8.6 11.5 13C16.8 9.6 19.7 5.4 24 1"></path></svg>
+          </div>
+          <img class="floral floral-l" src="assets/img/floral-left.webp" alt="" width="224" height="343">
+          <img class="floral floral-r" src="assets/img/floral-right.webp" alt="" width="236" height="359">
+          <img class="hero-paper" src="assets/img/paper-hero.webp" alt="">
+          <p class="hero-city" data-i18n="cityLine">San Felipe, Yaracuy</p>
+          <div class="hero-letter">
+            <p id="greeting" class="letter-copy"></p>
+            <p id="letter" class="letter-copy"></p>
+          </div>
+        </div>
       </header>
 
-      <section class="section alt">
+      <section class="section countdown-section" id="cuando">
         <div class="inner">
           <h2 class="section-title" data-i18n="countdownTitle">Falta muy poco</h2>
           <div class="clock" aria-live="polite">
-            <div><b id="cd-days">00</b><span data-i18n="days">Días</span></div>
-            <div><b id="cd-hours">00</b><span data-i18n="hours">Horas</span></div>
-            <div><b id="cd-minutes">00</b><span data-i18n="minutes">Minutos</span></div>
-            <div><b id="cd-seconds">00</b><span data-i18n="seconds">Segundos</span></div>
+            <div class="time-block"><b id="cd-days">00</b><span data-i18n="days">Días</span></div>
+            <span class="clock-sep" aria-hidden="true">:</span>
+            <div class="time-block"><b id="cd-hours">00</b><span data-i18n="hours">Horas</span></div>
+            <span class="clock-sep" aria-hidden="true">:</span>
+            <div class="time-block"><b id="cd-minutes">00</b><span data-i18n="minutes">Minutos</span></div>
+            <span class="clock-sep" aria-hidden="true">:</span>
+            <div class="time-block"><b id="cd-seconds">00</b><span data-i18n="seconds">Segundos</span></div>
           </div>
         </div>
       </section>
 
-      <section class="section">
-        <h2 class="section-title" data-i18n="scheduleTitle">Itinerario</h2>
-        <ol class="timeline">
-          <li>
-            <time>16:00</time>
-            <strong data-i18n="churchEvent">Ceremonia religiosa</strong>
-            <span class="note" data-i18n="churchNote">Catedral de San Felipe</span>
-          </li>
-          <li data-dinner>
-            <time>18:00</time>
-            <strong data-i18n="dinnerEvent">Cena familiar</strong>
-            <span class="note" data-i18n="dinnerNote">Hotel La Antigua Misión</span>
-          </li>
-          <li data-dinner>
-            <time>20:00</time>
-            <strong data-i18n="closeEvent">Cierre aproximado</strong>
-            <span class="note" data-i18n="closeNote">Nos despedimos con gratitud</span>
-          </li>
-        </ol>
+      <section class="section schedule-section">
+        <div class="board schedule-board">
+          <img class="schedule-paper schedule-paper-top" src="assets/img/schedule-top.webp" alt="">
+          <img class="schedule-paper schedule-paper-bot" src="assets/img/schedule-bot.webp" alt="">
+          <img class="title-flourish title-flourish-l" src="assets/img/title-left.webp" alt="">
+          <img class="title-flourish title-flourish-r" src="assets/img/title-right.webp" alt="">
+          <h2 class="section-title" data-i18n="scheduleTitle">Itinerario</h2>
+          <div class="timeline-wrap">
+            <img class="timeline-rose" src="assets/img/rose.webp" alt="" aria-hidden="true">
+            <ol class="timeline">
+              <li>
+                <time datetime="16:00" data-i18n="timeCeremony">4 PM</time>
+                <strong data-i18n="ceremonyEvent">Ceremonia</strong>
+                <span class="note" data-i18n="ceremonyNote">Catedral de San Felipe</span>
+              </li>
+              <li data-dinner>
+                <time datetime="18:00" data-i18n="timeToast">6 PM</time>
+                <strong data-i18n="toastEvent">Brindis</strong>
+                <span class="note" data-i18n="toastNote">Hotel La Antigua Misión</span>
+              </li>
+              <li data-dinner>
+                <time datetime="19:00" data-i18n="timeDinner">7 PM</time>
+                <strong data-i18n="dinnerEvent">Cena</strong>
+                <span class="note" data-i18n="dinnerNote">Hotel La Antigua Misión</span>
+              </li>
+              <li data-dinner>
+                <time datetime="20:00" data-i18n="timeCake">8 PM</time>
+                <strong data-i18n="cakeEvent">Corte de torta</strong>
+                <span class="note" data-i18n="cakeNote">Hotel La Antigua Misión</span>
+              </li>
+              <li data-dinner>
+                <time datetime="20:00" data-i18n="timeFarewell">8 PM</time>
+                <strong data-i18n="farewellEvent">Despedida</strong>
+                <span class="note" data-i18n="farewellNote">Con gratitud y cariño</span>
+              </li>
+            </ol>
+          </div>
+        </div>
       </section>
 
-      <section class="section alt">
-        <div class="inner">
-          <h2 class="section-title" data-i18n="placesTitle">Lugares</h2>
+      <section class="section places-section">
+        <div class="board places-board">
+          <div class="petals" aria-hidden="true">
+            <img class="petal petal-1" src="assets/img/petal.webp" alt="">
+            <img class="petal petal-2" src="assets/img/petal.webp" alt="">
+            <img class="petal petal-3" src="assets/img/petal.webp" alt="">
+            <img class="petal petal-4" src="assets/img/petal.webp" alt="">
+            <img class="petal petal-5" src="assets/img/petal.webp" alt="">
+            <img class="petal petal-6" src="assets/img/petal.webp" alt="">
+          </div>
+          <h2 class="section-title" data-i18n="placesTitle">Ubicación</h2>
+          <img class="acomm-decor" src="assets/img/acomm-decor.webp" alt="">
           <div class="places">
             <article class="place">
-              <h3 data-i18n="churchPlace">Boda en la iglesia</h3>
+              <h3 data-i18n="churchPlace">Ceremonia</h3>
               <p>Catedral de San Felipe<br>San Felipe, Yaracuy</p>
               <a class="map-link" data-i18n="openMap" href="https://maps.app.goo.gl/LHVNAJ6i5qG8KRHc7" target="_blank" rel="noopener">Ver en el mapa</a>
+              <div class="map-frame">
+                <img class="map-ornament map-ornament-top" src="assets/img/map-top.webp" alt="">
+                <div class="map-embed">
+                  <iframe title="Catedral de San Felipe" src="https://maps.google.com/maps?q=Catedral+de+San+Felipe,+Yaracuy,+Venezuela&hl=es&z=16&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+                </div>
+                <img class="map-ornament map-ornament-bot" src="assets/img/map-bot.webp" alt="">
+              </div>
             </article>
             <article class="place" data-dinner>
-              <h3 data-i18n="dinnerPlace">Cena familiar</h3>
+              <h3 data-i18n="dinnerPlace">Cena</h3>
               <p>Hotel La Antigua Misión<br>San Felipe, Yaracuy</p>
               <a class="map-link" data-i18n="openMap" href="https://maps.app.goo.gl/FopyTYkhcWWBcd487" target="_blank" rel="noopener">Ver en el mapa</a>
+              <div class="map-frame">
+                <img class="map-ornament map-ornament-top" src="assets/img/map-top.webp" alt="">
+                <div class="map-embed">
+                  <iframe title="Hotel La Antigua Misión" src="https://maps.google.com/maps?q=Hotel+La+Antigua+Misión,+San+Felipe,+Yaracuy,+Venezuela&hl=es&z=16&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+                </div>
+                <img class="map-ornament map-ornament-bot" src="assets/img/map-bot.webp" alt="">
+              </div>
             </article>
           </div>
         </div>
       </section>
 
-      <section class="section">
-        <div class="cards">
-          <article class="card">
+      <section class="section notes-section">
+        <div class="board notes-board">
+          <img class="notes-paper" src="assets/img/paper-hero.webp?v=22" alt="">
+          <img class="card-vine card-vine-r" src="assets/img/vine-r.webp?v=22" alt="">
+          <img class="card-vine card-vine-l" src="assets/img/vine-l.webp?v=22" alt="">
+          <div class="notes-block notes-dress">
             <h3 data-i18n="dressTitle">Vestimenta</h3>
             <p data-i18n="dressBody"></p>
-          </article>
-          <article class="card">
+          </div>
+          <div class="notes-block notes-gifts">
             <h3 data-i18n="giftsTitle">Obsequios</h3>
             <p data-i18n="giftsBody"></p>
             <p class="note" data-i18n="paymentSoon"></p>
@@ -141,15 +208,19 @@
                 <img id="qr-img" alt="QR">
               </div>
             </div>
-          </article>
+          </div>
         </div>
       </section>
 
-      <section class="section alt" id="rsvp">
+      <section class="section rsvp-section" id="rsvp">
         <div class="inner">
           <h2 class="section-title" data-i18n="rsvpTitle">Confirmación</h2>
           <p id="rsvp-lead" class="letter-copy"></p>
           <p id="rsvp-status" class="rsvp-status"></p>
+          <button id="rsvp-seal" class="wax-btn" type="button">
+            <img src="assets/img/wax-seal.webp" width="190" height="142" alt="RSVP">
+          </button>
+          <p class="seal-hint" data-i18n="sealHint">Toca el sello</p>
           <div id="rsvp-party" class="party is-hidden"></div>
           <div class="rsvp-actions">
             <button id="rsvp-confirm" class="btn" type="button" data-i18n="rsvpConfirm">Confirmar asistencia</button>
@@ -160,13 +231,22 @@
         </div>
       </section>
 
-      <footer class="footer" data-i18n="footer">Con amor, Stefany y Erikson</footer>
+      <footer class="footer">
+        <div class="board footer-board">
+          <p class="footer-hope" data-i18n="footerHope">¡Esperamos verte allí!</p>
+          <p class="footer-names" data-i18n="footer">Stefany y Erikson</p>
+          <img class="footer-floral footer-floral-l" src="assets/img/floral-left.webp" alt="">
+          <img class="footer-floral footer-floral-r" src="assets/img/floral-right.webp" alt="">
+        </div>
+      </footer>
     </main>
 
     <audio id="sfx-open" preload="none"></audio>
-    <audio id="ambiente" preload="none" loop></audio>
+    <audio id="ambiente" preload="auto" loop>
+      <source src="assets/audio/ambiente.m4a" type="audio/mp4">
+    </audio>
     <script src="js/config.js" defer></script>
     <script src="js/i18n.js" defer></script>
-    <script src="js/app.js" defer></script>
+    <script src="js/app.js?v=18" defer></script>
   </body>
 </html>
