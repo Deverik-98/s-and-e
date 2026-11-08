@@ -597,16 +597,22 @@
   function revealPayment() {
     const box = $("#payment-box");
     const qr = $("#qr-img");
-    const hasData = Boolean(config.payment.bank || config.payment.pagoMovil);
-    box.classList.toggle("is-hidden", !hasData);
-    $("#pay-holder").textContent = config.payment.holder || "";
-    $("#pay-bank").textContent = config.payment.bank || "";
-    $("#pay-pm").textContent = config.payment.pagoMovil || "";
-    if (qr && config.payment.qr) {
-      qr.addEventListener("error", () => qr.parentElement.classList.add("is-hidden"));
-      qr.src = config.payment.qr;
+    const pay = config.payment || {};
+    const hasData = Boolean(pay.bank || pay.pagoMovil || pay.id || pay.qr);
+    if (box) box.classList.toggle("is-hidden", !hasData);
+    const id = $("#pay-id");
+    if (id) id.textContent = pay.id || "";
+    const bank = $("#pay-bank");
+    if (bank) bank.textContent = pay.bank || "";
+    const phone = $("#pay-pm");
+    if (phone) phone.textContent = pay.pagoMovil || "";
+    if (qr && pay.qr) {
+      qr.addEventListener("error", () => qr.parentElement?.classList.add("is-hidden"));
+      if (!qr.getAttribute("src") || qr.getAttribute("src").indexOf(pay.qr) === -1) {
+        qr.src = pay.qr;
+      }
     } else if (qr) {
-      qr.parentElement.classList.add("is-hidden");
+      qr.parentElement?.classList.add("is-hidden");
     }
   }
 

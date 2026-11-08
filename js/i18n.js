@@ -45,7 +45,10 @@ SE.i18n = {
     dressBody: "Vestimenta formal. El color blanco queda exclusivamente reservado para la novia; cualquier otro tono elegante queda perfecto.",
     giftsTitle: "Obsequios",
     giftsBody:
-      "Tu presencia es el mejor regalo. Si además deseas hacernos un detalle, lo recibiremos con el corazón por transferencia o Pago Móvil.",
+      "Tu presencia es el mejor regalo. Si además deseas hacernos un detalle para nuestra nueva etapa, agradecemos que sea a través de pago móvil o en efectivo.",
+    payIdLabel: "Cédula",
+    payPhoneLabel: "Teléfono",
+    payBankLabel: "Banco",
     paymentSoon: "Los datos y el código QR se publicarán aquí muy pronto.",
     rsvpTitle: "Confirmación",
     rsvpLead:
@@ -118,7 +121,10 @@ SE.i18n = {
     dressBody: "Formal attire. White is reserved exclusively for the bride; any other elegant tone is perfect.",
     giftsTitle: "Gifts",
     giftsBody:
-      "Your presence is the greatest gift. If you also wish to give us something, we will gladly receive a bank transfer or Pago Móvil.",
+      "Your presence is the greatest gift. If you also wish to give us something for our new chapter, we kindly ask that it be via mobile payment or cash.",
+    payIdLabel: "ID",
+    payPhoneLabel: "Phone",
+    payBankLabel: "Bank",
     paymentSoon: "Account details and the QR code will appear here shortly.",
     rsvpTitle: "RSVP",
     rsvpLead: "This invitation is personal. Tap the seal and mark if you will attend.",
