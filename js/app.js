@@ -89,8 +89,6 @@
     if (letterMore) letterMore.textContent = t("letterMore");
     const letterNote = $("#letter-note");
     if (letterNote) letterNote.textContent = t("letterNote");
-    const rsvpLead = $("#rsvp-lead");
-    if (rsvpLead) rsvpLead.textContent = named("rsvpLead");
     const hint = $(".open-hint");
     if (hint) hint.textContent = named("openHint");
     const chip = $("#guest-chip");
@@ -221,10 +219,10 @@
     if (!hasCode) status.textContent = t("rsvpNeedLink");
     else if (!guestOk) status.textContent = t("invalidCode");
     else if (saving) status.textContent = t("rsvpSaving");
-    else if (value === "yes") status.textContent = named("rsvpYes");
-    else if (value === "no") status.textContent = named("rsvpNo");
+    else if (value === "yes") status.textContent = t("rsvpYes");
+    else if (value === "no") status.textContent = t("rsvpNo");
     else if (value === "partial") status.textContent = t("rsvpPartial");
-    else status.textContent = named("rsvpPending");
+    else status.textContent = state.picking ? t("rsvpPending") : "";
   }
 
   function renderRsvp() {

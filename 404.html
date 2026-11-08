@@ -54,7 +54,7 @@
     <link rel="preconnect" href="https://script.google.com">
     <link rel="preconnect" href="https://script.googleusercontent.com">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500;1,600&family=Ovo&display=swap">
-    <link rel="stylesheet" href="css/styles.css?v=41">
+    <link rel="stylesheet" href="css/styles.css?v=45">
   </head>
   <body>
     <a class="skip" href="#site">Skip</a>
@@ -240,15 +240,20 @@
       </section>
 
       <section class="section rsvp-section" id="rsvp">
-        <div class="inner">
-          <h2 class="section-title" data-i18n="rsvpTitle">Confirmación</h2>
-          <p id="rsvp-lead" class="letter-copy"></p>
-          <p id="rsvp-status" class="rsvp-status"></p>
-          <button id="rsvp-seal" class="wax-btn" type="button">
-            <img src="assets/img/wax-seal.webp" width="190" height="142" alt="RSVP">
-          </button>
-          <p class="seal-hint" data-i18n="sealHint">Toca el sello</p>
-          <div id="rsvp-party" class="party is-hidden" aria-live="polite"></div>
+        <div class="board rsvp-board">
+          <img class="rsvp-paper" src="assets/img/paper-edge.webp?v=43" alt="" decoding="async">
+          <div class="rsvp-vine rsvp-vine-l" aria-hidden="true">
+            <img src="assets/img/vine-l.webp?v=43" alt="">
+          </div>
+          <div class="rsvp-content">
+            <h2 class="section-title" data-i18n="rsvpTitle">Confirmación</h2>
+            <button id="rsvp-seal" class="wax-btn" type="button">
+              <img src="assets/img/wax-seal.webp" width="190" height="142" alt="RSVP">
+            </button>
+            <p class="seal-hint" data-i18n="sealHint">Toca el sello</p>
+            <div id="rsvp-party" class="party is-hidden" aria-live="polite"></div>
+            <p id="rsvp-status" class="rsvp-status" aria-live="polite"></p>
+          </div>
         </div>
       </section>
     </main>
@@ -257,8 +262,8 @@
     <audio id="ambiente" preload="auto" loop>
       <source src="assets/audio/ambiente.m4a" type="audio/mp4">
     </audio>
-    <script src="js/config.js?v=41" defer></script>
-    <script src="js/i18n.js?v=41" defer></script>
-    <script src="js/app.js?v=41" defer></script>
+    <script src="js/config.js?v=45" defer></script>
+    <script src="js/i18n.js?v=45" defer></script>
+    <script src="js/app.js?v=45" defer></script>
   </body>
 </html>

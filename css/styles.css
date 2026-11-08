@@ -1401,19 +1401,86 @@ a {
   pointer-events: none;
 }
 
-/* ── RSVP ── */
+/* ── RSVP: paper-edge overlaps previous section; vine on 450 board ── */
 .rsvp-section {
-  padding: 0 0 24px;
-  background: var(--cream);
+  position: relative;
+  margin-top: -56px;
+  padding: 0;
+  background: transparent;
+  overflow: visible;
 }
 
-.rsvp-section .inner {
-  padding-top: 40px;
-  padding-bottom: 48px;
+.rsvp-board {
+  --board-h: 560px;
+  min-height: 560px;
+  height: auto;
+  overflow: visible;
+  background: transparent;
+  padding-bottom: 36px;
+}
+
+.rsvp-paper {
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  bottom: 0;
+  top: 15px;
+  width: 744px;
+  max-width: none;
+  height: auto;
+  min-height: calc(100% + 48px);
+  object-fit: fill;
+  object-position: center top;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.rsvp-vine {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+  line-height: 0;
+}
+
+.rsvp-vine img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: none;
+}
+
+.rsvp-vine-l {
+  top: -6px;
+  left: -70px;
+  width: 251px;
+}
+
+.rsvp-vine-l img {
+  transform-origin: center center;
+  animation: swayVineL 6s infinite linear;
+}
+
+@container board-wrap (max-width: 449.98px) {
+  .rsvp-board .rsvp-vine-l {
+    top: 0;
+    left: -15px;
+    width: 251px;
+  }
+}
+
+.rsvp-content {
+  position: relative;
+  z-index: 2;
+  width: 450px;
+  margin: 0 auto;
+  padding: 64px 28px 28px;
+  text-align: center;
+  box-sizing: border-box;
 }
 
 .rsvp-status {
-  margin: 18px 0 22px;
+  margin: 14px 0 0;
+  min-height: 1.4em;
 }
 
 .wax-btn {
