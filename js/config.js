@@ -17,9 +17,9 @@ SE.config = {
       map: "https://maps.app.goo.gl/LHVNAJ6i5qG8KRHc7",
     },
     dinner: {
-      name: "Hotel La Antigua Misión",
-      city: "San Felipe, Yaracuy",
-      map: "https://maps.app.goo.gl/FopyTYkhcWWBcd487",
+      name: "Eventos Platinum",
+      city: "Av. La Paz, San Felipe, Yaracuy",
+      map: "https://maps.app.goo.gl/uYQwyhexiueHMFBx5",
     },
   },
   schedule: [

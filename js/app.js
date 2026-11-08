@@ -14,6 +14,10 @@
     guestRequested: false,
     muted: localStorage.getItem("se-muted") === "1",
     musicReady: false,
+    partyDebounce: null,
+    partyInflight: null,
+    partyQueued: null,
+    partyBound: false,
   };
 
   function readInviteCode() {
@@ -168,49 +172,165 @@
     window.addEventListener("resize", onScroll, { passive: true });
   }
 
-  function renderRsvp() {
+  function rsvpCanRespond() {
+    return Boolean(state.code && state.guest && state.guest.ok !== false);
+  }
+
+  function familySummaryFromPeople(peopleMap) {
+    const people = partyList();
+    if (!people.length) return "pending";
+    let yes = 0;
+    let no = 0;
+    people.forEach((person) => {
+      const value = peopleMap[person.id] || "no";
+      if (value === "yes") yes += 1;
+      else no += 1;
+    });
+    if (yes === people.length) return "yes";
+    if (no === people.length) return "no";
+    return "partial";
+  }
+
+  function collectPeopleMap() {
+    const map = {};
+    partyList().forEach((person) => {
+      const input = $(`#rsvp-party [data-person="${String(person.id).replace(/"/g, "")}"]`);
+      if (input) map[person.id] = input.checked ? "yes" : "no";
+      else map[person.id] = person.status === "yes" ? "yes" : "no";
+    });
+    return map;
+  }
+
+  function setRsvpStatusText() {
     const status = $("#rsvp-status");
-    const confirmBtn = $("#rsvp-confirm");
-    const declineBtn = $("#rsvp-decline");
-    const saveBtn = $("#rsvp-save");
-    const changeBtn = $("#rsvp-change");
-    const box = $("#rsvp-party");
+    if (!status) return;
     const hasCode = Boolean(state.code);
     const guestOk = Boolean(state.guest && state.guest.ok !== false);
-    const canRespond = hasCode && guestOk;
-    const group = isGroup();
     const value = state.guest?.status || "pending";
-    const answered = value !== "pending";
-    const showPicker = canRespond && group && (state.picking || !answered);
-
-    confirmBtn.classList.toggle("is-hidden", !canRespond || showPicker || answered);
-    declineBtn.classList.toggle("is-hidden", !canRespond || showPicker || answered);
-    saveBtn.classList.toggle("is-hidden", !showPicker);
-    changeBtn.classList.toggle("is-hidden", !canRespond || !answered);
-    box.classList.toggle("is-hidden", !showPicker);
-
-    confirmBtn.textContent = t("rsvpConfirm");
-    declineBtn.textContent = group ? t("rsvpDeclineGroup") : t("rsvpDecline");
-    saveBtn.textContent = t("rsvpSave");
-
-    if (showPicker) renderParty(box);
+    const saving = Boolean(state.partyInflight);
 
     if (!hasCode) status.textContent = t("rsvpNeedLink");
     else if (!guestOk) status.textContent = t("invalidCode");
+    else if (saving) status.textContent = t("rsvpSaving");
     else if (value === "yes") status.textContent = named("rsvpYes");
     else if (value === "no") status.textContent = named("rsvpNo");
     else if (value === "partial") status.textContent = t("rsvpPartial");
     else status.textContent = named("rsvpPending");
   }
 
+  function renderRsvp() {
+    const box = $("#rsvp-party");
+    const canRespond = rsvpCanRespond();
+    const showPicker = canRespond && state.picking;
+
+    if (box) box.classList.toggle("is-hidden", !showPicker);
+    if (showPicker) renderParty(box);
+    setRsvpStatusText();
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, (ch) => (
+      { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]
+    ));
+  }
+
   function renderParty(box) {
+    if (!box) return;
     const people = partyList();
-    box.innerHTML = `<p class="party-title">${t("rsvpWho")}</p>` + people.map((person) => `
-      <label class="party-item">
-        <input type="checkbox" data-person="${person.id}" ${person.status !== "no" ? "checked" : ""}>
-        <span>${person.name}</span>
+    const title = isGroup() ? t("rsvpWho") : t("rsvpWhoSolo");
+    const saving = Boolean(state.partyInflight);
+    box.innerHTML = `<p class="party-title">${escapeHtml(title)}</p>` + people.map((person) => `
+      <label class="party-item${saving ? " is-saving" : ""}">
+        <input type="checkbox" data-person="${escapeHtml(person.id)}" ${person.status === "yes" ? "checked" : ""} ${saving ? "disabled" : ""}>
+        <span class="party-name">${escapeHtml(person.name)}</span>
+        <span class="party-spinner" aria-hidden="true"></span>
       </label>
     `).join("");
+    bindPartyBox(box);
+  }
+
+  function bindPartyBox(box) {
+    if (state.partyBound || !box) return;
+    state.partyBound = true;
+    box.addEventListener("change", (event) => {
+      const input = event.target;
+      if (!(input instanceof HTMLInputElement) || !input.dataset.person) return;
+      schedulePartySave();
+    });
+  }
+
+  function applyPeopleMap(peopleMap) {
+    const nextParty = partyList().map((person) => ({
+      ...person,
+      status: peopleMap[person.id] === "yes" ? "yes" : "no",
+    }));
+    applyGuest({
+      ...state.guest,
+      status: familySummaryFromPeople(peopleMap),
+      party: nextParty,
+    });
+  }
+
+  function schedulePartySave() {
+    if (!rsvpCanRespond()) return;
+    const peopleMap = collectPeopleMap();
+    applyPeopleMap(peopleMap);
+    setRsvpStatusText();
+
+    window.clearTimeout(state.partyDebounce);
+    state.partyDebounce = window.setTimeout(() => {
+      commitPartySave();
+    }, 380);
+  }
+
+  async function commitPartySave() {
+    if (!rsvpCanRespond()) return;
+    const peopleMap = collectPeopleMap();
+
+    if (state.partyInflight) {
+      state.partyQueued = peopleMap;
+      return;
+    }
+
+    const previous = JSON.parse(JSON.stringify(state.guest));
+    state.partyInflight = true;
+    renderParty($("#rsvp-party"));
+    setRsvpStatusText();
+
+    let failed = false;
+    try {
+      if (state.code === "demo") {
+        await new Promise((resolve) => window.setTimeout(resolve, 320));
+        applyPeopleMap(peopleMap);
+      } else {
+        const payload = {
+          action: "rsvp",
+          i: state.code,
+          status: familySummaryFromPeople(peopleMap),
+          p: Object.entries(peopleMap).map(([id, value]) => `${id}:${value}`).join("|"),
+        };
+        const data = await scriptGet(payload);
+        if (!data.ok) throw new Error("rsvp");
+        applyGuest(data);
+      }
+    } catch {
+      failed = true;
+      applyGuest(previous);
+      const status = $("#rsvp-status");
+      if (status) status.textContent = t("rsvpError");
+    } finally {
+      state.partyInflight = null;
+      const queued = state.partyQueued;
+      state.partyQueued = null;
+      renderParty($("#rsvp-party"));
+      if (!failed) setRsvpStatusText();
+      if (queued) {
+        applyPeopleMap(queued);
+        renderParty($("#rsvp-party"));
+        setRsvpStatusText();
+        commitPartySave();
+      }
+    }
   }
 
   function prepareMusic() {
@@ -438,13 +558,13 @@
     state.guestRequested = true;
     state.guestReady = (async () => {
       if (!config.scriptUrl && !window.SE.scriptUrl) {
-        applyGuest(state.code === "demo" ? { ok: false } : { ok: false });
+        applyGuest({ ok: false });
         return;
       }
       try {
         applyGuest(await scriptGet({ action: "guest", i: state.code }));
       } catch {
-        if (!state.guest) applyGuest(state.code === "demo" ? { ok: false } : { ok: false });
+        if (!state.guest) applyGuest({ ok: false });
       }
     })();
     return state.guestReady;
@@ -463,48 +583,6 @@
       }
     }, { rootMargin: "200px 0px" });
     io.observe(section);
-  }
-
-  async function sendRsvp(status, people) {
-    if (!state.code || !state.guest || state.guest.ok === false) return;
-    const previous = JSON.parse(JSON.stringify(state.guest));
-    if (people) {
-      const nextParty = partyList().map((person) => ({
-        ...person,
-        status: people[person.id] || "no",
-      }));
-      const yes = nextParty.filter((p) => p.status === "yes").length;
-      const summary = yes === nextParty.length ? "yes" : yes === 0 ? "no" : "partial";
-      applyGuest({ ...state.guest, status: summary, party: nextParty });
-      state.picking = false;
-    } else {
-      applyGuest({
-        ...state.guest,
-        status,
-        party: partyList().map((person) => ({ ...person, status })),
-      });
-      state.picking = false;
-    }
-    try {
-      const payload = { action: "rsvp", i: state.code, status };
-      if (people) {
-        payload.p = Object.entries(people).map(([id, value]) => `${id}:${value}`).join("|");
-      }
-      const data = await scriptGet(payload);
-      if (!data.ok) throw new Error("rsvp");
-      applyGuest(data);
-    } catch {
-      applyGuest(previous);
-      $("#rsvp-status").textContent = t("rsvpError");
-    }
-  }
-
-  function saveParty() {
-    const people = {};
-    $$("#rsvp-party [data-person]").forEach((input) => {
-      people[input.dataset.person] = input.checked ? "yes" : "no";
-    });
-    sendRsvp("yes", people);
   }
 
   function revealPayment() {
@@ -570,36 +648,20 @@
       localStorage.setItem("se-muted", state.muted ? "1" : "0");
       applyLang();
     });
-    $("#rsvp-seal")?.addEventListener("click", () => {
-      const confirmBtn = $("#rsvp-confirm");
-      if (confirmBtn && !confirmBtn.classList.contains("is-hidden") && !confirmBtn.disabled) {
-        confirmBtn.click();
+    $("#rsvp-seal")?.addEventListener("click", async () => {
+      await ensureGuest();
+      if (!rsvpCanRespond()) {
+        state.picking = false;
+        renderRsvp();
         return;
       }
-      $("#rsvp-change")?.click();
+      state.picking = true;
+      renderRsvp();
     });
     $("#lang-toggle").addEventListener("click", () => {
       state.lang = state.lang === "es" ? "en" : "es";
       localStorage.setItem("se-lang", state.lang);
       applyLang();
-    });
-    $("#rsvp-confirm").addEventListener("click", () => {
-      if (isGroup()) {
-        state.picking = true;
-        renderRsvp();
-        return;
-      }
-      sendRsvp("yes");
-    });
-    $("#rsvp-decline").addEventListener("click", () => sendRsvp("no"));
-    $("#rsvp-save").addEventListener("click", saveParty);
-    $("#rsvp-change").addEventListener("click", () => {
-      if (isGroup()) {
-        state.picking = true;
-        renderRsvp();
-        return;
-      }
-      sendRsvp("pending");
     });
   }
 
@@ -612,9 +674,7 @@
     bindTimelineRose();
     tick();
     window.setInterval(tick, 1000);
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      skipEnvelope();
-    }
+    // Always wait for envelope tap (even with prefers-reduced-motion)
     watchRsvp();
   }
 
