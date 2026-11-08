@@ -13,7 +13,7 @@ SE.config = {
   venues: {
     church: {
       name: "Catedral de San Felipe",
-      city: "San Felipe, Yaracuy",
+      city: "",
       map: "https://maps.app.goo.gl/LHVNAJ6i5qG8KRHc7",
     },
     dinner: {
@@ -23,11 +23,10 @@ SE.config = {
     },
   },
   schedule: [
-    { time: "5 PM", key: "ceremony" },
-    { time: "7 PM", key: "toast" },
-    { time: "8 PM", key: "dinner" },
-    { time: "9 PM", key: "cake" },
-    { time: "9 PM", key: "farewell" },
+    { time: "5:30 PM", key: "ceremony" },
+    { time: "7:30 PM", key: "toast" },
+    { time: "8:30 PM", key: "dinner" },
+    { time: "10 PM", key: "cake" },
   ],
   payment: {
     bank: "",
