@@ -1411,11 +1411,18 @@ a {
 }
 
 .rsvp-board {
-  --board-h: 560px;
-  min-height: 560px;
+  --board-h: 420px;
+  min-height: 420px;
   height: auto;
   overflow: visible;
   background: transparent;
+  padding-bottom: 20px;
+  transition: min-height 0.25s var(--ease);
+}
+
+.rsvp-section.is-picking .rsvp-board {
+  --board-h: 560px;
+  min-height: 0;
   padding-bottom: 36px;
 }
 
@@ -1428,7 +1435,7 @@ a {
   width: 744px;
   max-width: none;
   height: auto;
-  min-height: calc(100% + 48px);
+  min-height: calc(100% - 15px);
   object-fit: fill;
   object-position: center top;
   transform: translateX(-50%);
@@ -1449,20 +1456,25 @@ a {
   max-width: none;
 }
 
+/*
+  Same board coords pattern as notes .card-vine-l:
+  desktop 450col left -70 w251; mobile maps inward to left -15
+  (vine-l.webp is top-left oriented — swayL only, no 274deg)
+*/
 .rsvp-vine-l {
-  top: -6px;
+  top: -8px;
   left: -70px;
   width: 251px;
 }
 
 .rsvp-vine-l img {
-  transform-origin: center center;
-  animation: swayVineL 6s infinite linear;
+  transform-origin: 15% 10%;
+  animation: swayL 4s infinite linear;
 }
 
 @container board-wrap (max-width: 449.98px) {
   .rsvp-board .rsvp-vine-l {
-    top: 0;
+    top: -4px;
     left: -15px;
     width: 251px;
   }
@@ -1473,9 +1485,13 @@ a {
   z-index: 2;
   width: 450px;
   margin: 0 auto;
-  padding: 64px 28px 28px;
+  padding: 56px 28px 16px;
   text-align: center;
   box-sizing: border-box;
+}
+
+.rsvp-section.is-picking .rsvp-content {
+  padding-bottom: 28px;
 }
 
 .rsvp-status {
@@ -1504,6 +1520,10 @@ a {
   font-weight: 300;
   color: var(--gold);
   animation: bob 1.1s infinite linear;
+}
+
+.rsvp-section.is-picking .seal-hint {
+  display: none;
 }
 
 @keyframes waxIn {

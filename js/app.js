@@ -227,9 +227,11 @@
 
   function renderRsvp() {
     const box = $("#rsvp-party");
+    const section = $("#rsvp");
     const canRespond = rsvpCanRespond();
     const showPicker = canRespond && state.picking;
 
+    section?.classList.toggle("is-picking", showPicker);
     if (box) box.classList.toggle("is-hidden", !showPicker);
     if (showPicker) renderParty(box);
     setRsvpStatusText();
@@ -668,7 +670,7 @@
         renderRsvp();
         return;
       }
-      state.picking = true;
+      state.picking = !state.picking;
       renderRsvp();
     });
     $("#lang-toggle").addEventListener("click", () => {
