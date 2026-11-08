@@ -1214,6 +1214,11 @@ a {
     left: -15px;
     width: 251px;
   }
+
+  .notes-attire {
+    top: 204px;
+    width: min(300px, calc(100% - 40px));
+  }
 }
 
 @keyframes swayVineL {
@@ -1231,8 +1236,28 @@ a {
   text-align: center;
 }
 
-.notes-dress { top: 86px; }
-.notes-gifts { top: 284px; }
+.notes-dress { top: 64px; }
+
+.notes-attire {
+  top: 198px;
+  left: 50%;
+  width: min(320px, calc(100% - 56px));
+  transform: translateX(-50%);
+}
+
+.dress-code-img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  object-fit: contain;
+  object-position: center;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: high-quality;
+  pointer-events: none;
+  user-select: none;
+}
 
 .notes-block h3 {
   margin: 0 0 8px;
@@ -1255,6 +1280,40 @@ a {
 
 .notes-block p.note {
   margin-top: 8px;
+  font-size: 15px;
+  line-height: 1.3;
+  color: #846f61;
+}
+
+/* ── Gifts (moved out of notes board) ── */
+.gifts-section {
+  padding: 28px 0 12px;
+  background: var(--paper);
+  text-align: center;
+}
+
+.gifts-inner {
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.gifts-section .section-title {
+  margin-bottom: 12px;
+}
+
+.gifts-body {
+  margin: 0 auto 10px;
+  max-width: 310px;
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 100;
+  line-height: 1.3;
+  color: #6c513f;
+}
+
+.gifts-note {
+  margin: 0 auto;
+  max-width: 310px;
   font-size: 15px;
   line-height: 1.3;
   color: #846f61;

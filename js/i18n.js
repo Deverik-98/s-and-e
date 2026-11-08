@@ -42,7 +42,7 @@ SE.i18n = {
     dinnerPlace: "Cena",
     openMap: "Ver en el mapa",
     dressTitle: "Vestimenta",
-    dressBody: "Vestimenta formal. El azul rey estará presente en el traje del novio; cualquier otro tono elegante queda perfecto.",
+    dressBody: "Vestimenta formal. El color blanco queda exclusivamente reservado para la novia; cualquier otro tono elegante queda perfecto.",
     giftsTitle: "Obsequios",
     giftsBody:
       "Tu presencia es el mejor regalo. Si además deseas hacernos un detalle, lo recibiremos con el corazón por transferencia o Pago Móvil.",
@@ -114,8 +114,8 @@ SE.i18n = {
     churchPlace: "Ceremony",
     dinnerPlace: "Dinner",
     openMap: "Open in Maps",
-    dressTitle: "Dress code",
-    dressBody: "Formal attire. Royal blue will be worn by the groom; any other elegant tone is welcome.",
+    dressTitle: "Attire",
+    dressBody: "Formal attire. White is reserved exclusively for the bride; any other elegant tone is perfect.",
     giftsTitle: "Gifts",
     giftsBody:
       "Your presence is the greatest gift. If you also wish to give us something, we will gladly receive a bank transfer or Pago Móvil.",
