@@ -8,7 +8,7 @@ SE.config = {
     groomLast: "Pacheco",
     initials: "S&E",
   },
-  weddingAt: "2026-12-25T16:00:00-04:00",
+  weddingAt: "2026-12-26T17:00:00-04:00",
   timezone: "America/Caracas",
   venues: {
     church: {
@@ -23,11 +23,11 @@ SE.config = {
     },
   },
   schedule: [
-    { time: "4 PM", key: "ceremony" },
-    { time: "6 PM", key: "toast" },
-    { time: "7 PM", key: "dinner" },
-    { time: "8 PM", key: "cake" },
-    { time: "8 PM", key: "farewell" },
+    { time: "5 PM", key: "ceremony" },
+    { time: "7 PM", key: "toast" },
+    { time: "8 PM", key: "dinner" },
+    { time: "9 PM", key: "cake" },
+    { time: "9 PM", key: "farewell" },
   ],
   payment: {
     bank: "",
