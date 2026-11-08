@@ -10,15 +10,13 @@ SE.i18n = {
     saveTheDate: "Nuestra Boda",
     dateLine: "26 de diciembre de 2026 · 5:00 p. m.",
     cityLine: "San Felipe, Yaracuy",
-    greetingGeneric: "Queridos familiares y amigos,",
-    greetingFor: "Te invitamos a ti, {name},",
-    greetingForGroup: "Te invitamos a ti, {name}, y a los tuyos,",
+    letterTitleFallback: "Familia y amigos",
     letter:
-      "Con mucha alegría te invitamos a celebrar el día en que unimos nuestras vidas. Queremos que nos acompañes en la ceremonia y, si tu invitación lo incluye, en la cena en familia.",
-    letterFor:
-      "Con mucha alegría te invitamos a ti, {name}, a celebrar el día en que unimos nuestras vidas. Queremos que nos acompañes en la ceremonia y, si tu invitación lo incluye, en la cena en familia.",
-    letterForGroup:
-      "Con mucha alegría los invitamos, {name}, a celebrar el día en que unimos nuestras vidas. Esta invitación es para tu núcleo familiar.",
+      "Hay momentos en la vida que son especiales por sí solos, pero compartirlos con personas tan queridas los hace inolvidables.",
+    letterMore:
+      "Con mucha alegría queremos invitarte a celebrar el día en que uniremos nuestras vidas.",
+    letterNote:
+      "Al final encontrarás los pases reservados especialmente para confirmar tu asistencia.",
     scroll: "Desliza",
     sealHint: "Toca el sello",
     countdownTitle: "Falta muy poco",
@@ -88,15 +86,13 @@ SE.i18n = {
     saveTheDate: "Our Wedding",
     dateLine: "December 26, 2026 · 5:00 p.m.",
     cityLine: "San Felipe, Yaracuy",
-    greetingGeneric: "Dear family and friends,",
-    greetingFor: "We invite you, {name},",
-    greetingForGroup: "We invite you, {name}, and your family,",
+    letterTitleFallback: "Family and friends",
     letter:
-      "With great joy we invite you to celebrate the day we begin our life together. Please join us for the ceremony and, if your invitation includes it, for a family dinner afterwards.",
-    letterFor:
-      "With great joy we invite you, {name}, to celebrate the day we begin our life together. Please join us for the ceremony and, if your invitation includes it, for a family dinner afterwards.",
-    letterForGroup:
-      "With great joy we invite you, {name}, and your family to celebrate the day we begin our life together.",
+      "Some moments in life are special on their own, but sharing them with people we love makes them unforgettable.",
+    letterMore:
+      "With great joy we invite you to celebrate the day we join our lives together.",
+    letterNote:
+      "At the end you will find the passes reserved especially for you to confirm your attendance.",
     scroll: "Scroll",
     sealHint: "Tap the seal",
     countdownTitle: "The celebration begins in",

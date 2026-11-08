@@ -42,8 +42,17 @@
     return String(table[key] || i18n.es[key] || key).replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? "");
   };
 
+  function titleCaseName(value) {
+    return String(value || "")
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((word) => word.charAt(0).toLocaleUpperCase(state.lang) + word.slice(1).toLocaleLowerCase(state.lang))
+      .join(" ");
+  }
+
   function guestName() {
-    const name = String(state.guest?.name || "").trim();
+    const name = titleCaseName(state.guest?.name || "");
     return state.guest && state.guest.ok !== false && name ? name : "";
   }
 
@@ -72,14 +81,14 @@
     $$("[data-i18n]").forEach((el) => {
       el.textContent = t(el.dataset.i18n);
     });
-    const greeting = $("#greeting");
-    if (greeting) {
-      greeting.textContent = !name
-        ? t("greetingGeneric")
-        : isGroup() ? t("greetingForGroup", { name }) : t("greetingFor", { name });
-    }
+    const heroGuest = $("#hero-guest");
+    if (heroGuest) heroGuest.textContent = name || t("letterTitleFallback");
     const letter = $("#letter");
-    if (letter) letter.textContent = named("letter");
+    if (letter) letter.textContent = t("letter");
+    const letterMore = $("#letter-more");
+    if (letterMore) letterMore.textContent = t("letterMore");
+    const letterNote = $("#letter-note");
+    if (letterNote) letterNote.textContent = t("letterNote");
     const rsvpLead = $("#rsvp-lead");
     if (rsvpLead) rsvpLead.textContent = named("rsvpLead");
     const hint = $(".open-hint");
@@ -242,7 +251,7 @@
     box.innerHTML = `<p class="party-title">${escapeHtml(title)}</p>` + people.map((person) => `
       <label class="party-item${saving ? " is-saving" : ""}">
         <input type="checkbox" data-person="${escapeHtml(person.id)}" ${person.status === "yes" ? "checked" : ""} ${saving ? "disabled" : ""}>
-        <span class="party-name">${escapeHtml(person.name)}</span>
+        <span class="party-name">${escapeHtml(titleCaseName(person.name))}</span>
         <span class="party-spinner" aria-hidden="true"></span>
       </label>
     `).join("");
