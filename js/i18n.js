@@ -14,7 +14,7 @@ SE.i18n = {
     letter:
       "Hay momentos en la vida que son especiales por sí solos, pero compartirlos con personas tan queridas los hace inolvidables.",
     letterMore:
-      "Con mucha alegría queremos invitarte a celebrar el día en que formalicemos nuestra unión.",
+      "Con mucha alegría queremos invitarte a celebrar el día en que formalizamos nuestra unión.",
     letterNote:
       "Al final encontrarás los pases reservados especialmente para confirmar tu asistencia.",
     scroll: "Desliza",
