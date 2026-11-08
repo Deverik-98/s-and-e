@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <meta name="theme-color" content="#5A0F1B">
+    <meta name="theme-color" content="#5A0F1B" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#4A0C16" media="(prefers-color-scheme: dark)">
+    <title>Stefany & Erikson — 26.12.2026</title>
+    <meta name="description" content="Stefany Gutierrez y Erikson Pacheco — 26 de diciembre de 2026 · Te invitamos a celebrar nuestra boda.">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Stefany & Erikson">
+    <meta property="og:locale" content="es_VE">
+    <meta property="og:title" content="Stefany & Erikson — 26.12.2026">
+    <meta property="og:description" content="Te invitamos a celebrar nuestra boda · 26 de diciembre de 2026 · 5:00 p. m.">
+    <meta property="og:url" content="https://deverik-98.github.io/s-and-e/">
+    <meta property="og:image" content="https://deverik-98.github.io/s-and-e/assets/img/og-share.jpg?v=48">
+    <meta property="og:image:secure_url" content="https://deverik-98.github.io/s-and-e/assets/img/og-share.jpg?v=48">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Invitación de boda Stefany y Erikson">
+    <link rel="image_src" href="https://deverik-98.github.io/s-and-e/assets/img/og-share.jpg?v=48">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Stefany & Erikson — 26.12.2026">
+    <meta name="twitter:description" content="Te invitamos a celebrar nuestra boda · 26 de diciembre de 2026 · 5:00 p. m.">
+    <meta name="twitter:image" content="https://deverik-98.github.io/s-and-e/assets/img/og-share.jpg?v=48">
+    <script>
+      window.SE = window.SE || {};
+      SE.base = /github\.io$/i.test(location.hostname) ? "/s-and-e/" : "/";
+      document.head.appendChild(Object.assign(document.createElement("base"), { href: SE.base }));
+      SE.scriptUrl = "https://script.google.com/macros/s/AKfycbxQzrA-d-0ESODYfs0DlGn0t6JeA2XjCNi0YDXUXWMKAVEsfwcOUKOjRkwp2XyYW6z_jQ/exec";
+      (function () {
+        var reserved = { "s-and-e": 1, "nos-casamos": 1, "te-invitamos-a-nuestra-boda": 1, "index.html": 1, "404.html": 1 };
+        var q = new URLSearchParams(location.search).get("i");
+        var parts = location.pathname.split("/").filter(Boolean);
+        if (parts[0] === "s-and-e") parts.shift();
+        var last = parts[parts.length - 1] || "";
+        SE.code = (q || (!reserved[last] ? decodeURIComponent(last) : "")).trim();
+        if (!SE.code) return;
+        try { SE.cachedGuest = JSON.parse(localStorage.getItem("se-guest:" + SE.code) || "null"); } catch (e) {}
+      })();
+    </script>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="preload" as="image" href="assets/img/paper-hero.webp">
+    <link rel="preload" as="image" href="assets/img/floral-left.webp?v=24">
+    <link rel="preload" as="image" href="assets/img/floral-right.webp?v=24">
+    <link rel="preload" as="image" href="assets/img/sobre.jpg">
+    <link rel="preload" as="video" href="assets/video/abrir.mp4?v=4">
+    <link rel="preload" as="audio" href="assets/audio/ambiente.m4a">
+    <link rel="preload" as="font" href="assets/fonts/GreatVibes-Regular.ttf" type="font/ttf" crossorigin>
+    <link rel="preload" as="font" href="assets/fonts/PinyonScript-Regular.ttf" type="font/ttf" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://script.google.com">
+    <link rel="preconnect" href="https://script.googleusercontent.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500;1,600&family=Ovo&display=swap">
+    <link rel="stylesheet" href="css/styles.css?v=47">
+  </head>
+  <body>
+    <a class="skip" href="#site">Skip</a>
+
+    <div class="topbar">
+      <button id="lang-toggle" class="ghost" type="button" aria-label="English">EN</button>
+    </div>
+
+    <section id="envelope-screen" class="envelope-screen" role="button" tabindex="0" aria-label="Invitación">
+      <p id="guest-chip" class="guest-chip is-hidden"></p>
+      <div class="open-stage">
+        <img id="wei-img" class="open-still" src="assets/img/sobre.jpg" alt="Abrir invitación" draggable="false">
+        <video id="open-video" class="open-video" muted playsinline preload="auto" poster="assets/img/sobre.jpg">
+          <source src="assets/video/abrir.mp4?v=4" type="video/mp4">
+        </video>
+        <div id="tap-wrap" class="tap-wrap">
+          <div class="wei-chevron" aria-hidden="true"></div>
+          <p class="open-hint" data-i18n="openHint">Toca para abrir</p>
+        </div>
+      </div>
+    </section>
+
+    <button id="mute-toggle" class="audio-fab" type="button" aria-label="Silenciar">
+      <svg id="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"></rect><rect x="14" y="5" width="4" height="14" rx="1"></rect></svg>
+      <svg id="icon-play" viewBox="0 0 24 24" aria-hidden="true"><polygon points="5,3 19,12 5,21"></polygon></svg>
+    </button>
+
+    <main id="site" class="site">
+      <header class="hero">
+        <div class="board hero-board">
+          <video id="hero-video" class="hero-video" muted loop playsinline preload="auto" poster="assets/img/hero.jpg">
+            <source src="assets/video/cisnes.mp4?v=3" type="video/mp4">
+          </video>
+          <div class="hero-glow" aria-hidden="true"></div>
+          <p class="kicker" data-i18n="saveTheDate">Nuestra Boda</p>
+          <p class="hero-date" data-i18n="dateLine">26 de diciembre de 2026 · 5:00 p. m.</p>
+          <h1 class="names"><span>Stefany</span><span class="amp" aria-hidden="true">&</span><span class="visually-hidden"> y </span><span>Erikson</span></h1>
+          <div class="scroll-block">
+            <span class="scroll-cue" data-i18n="scroll">Desliza</span>
+            <svg class="scroll-chevron" viewBox="0 0 25 16" aria-hidden="true"><path fill="none" stroke="#937100" stroke-width="1" stroke-linecap="round" d="M1 1c3.4 4.4 8.1 8.6 11.5 13C16.8 9.6 19.7 5.4 24 1"></path></svg>
+          </div>
+          <img class="floral floral-l" src="assets/img/floral-left.webp?v=24" alt="" width="224" height="343">
+          <img class="floral floral-r" src="assets/img/floral-right.webp?v=24" alt="" width="236" height="359">
+          <img class="hero-paper" src="assets/img/paper-hero.webp" alt="">
+          <p id="hero-guest" class="hero-city">San Felipe, Yaracuy</p>
+          <div class="hero-letter">
+            <p id="letter" class="letter-copy"></p>
+            <p id="letter-more" class="letter-copy"></p>
+            <p id="letter-note" class="letter-note"></p>
+          </div>
+        </div>
+      </header>
+
+      <section class="section countdown-section" id="cuando">
+        <div class="inner">
+          <h2 class="section-title" data-i18n="countdownTitle">Falta muy poco</h2>
+          <div class="clock" aria-live="polite">
+            <div class="time-block"><b id="cd-days">00</b><span data-i18n="days">Días</span></div>
+            <span class="clock-sep" aria-hidden="true">:</span>
+            <div class="time-block"><b id="cd-hours">00</b><span data-i18n="hours">Horas</span></div>
+            <span class="clock-sep" aria-hidden="true">:</span>
+            <div class="time-block"><b id="cd-minutes">00</b><span data-i18n="minutes">Minutos</span></div>
+            <span class="clock-sep" aria-hidden="true">:</span>
+            <div class="time-block"><b id="cd-seconds">00</b><span data-i18n="seconds">Segundos</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section schedule-section">
+        <div class="board schedule-board">
+          <img class="schedule-paper schedule-paper-top" src="assets/img/schedule-top.webp" alt="">
+          <img class="schedule-paper schedule-paper-bot" src="assets/img/schedule-bot.webp" alt="">
+          <img class="title-flourish title-flourish-l" src="assets/img/title-left.webp" alt="">
+          <img class="title-flourish title-flourish-r" src="assets/img/title-right.webp" alt="">
+          <h2 class="section-title" data-i18n="scheduleTitle">Itinerario</h2>
+          <div class="timeline-wrap">
+            <img class="timeline-rose" src="assets/img/rose.webp?v=24" alt="" aria-hidden="true">
+            <ol class="timeline">
+              <li>
+                <time datetime="17:30" data-i18n="timeCeremony">5:30 PM</time>
+                <strong data-i18n="ceremonyEvent">Ceremonia</strong>
+                <span class="note" data-i18n="ceremonyNote">Catedral de San Felipe</span>
+              </li>
+              <li data-dinner>
+                <time datetime="19:30" data-i18n="timeToast">7:30 PM</time>
+                <strong data-i18n="toastEvent">Vals y Brindis</strong>
+                <span class="note" data-i18n="toastNote">Eventos Platinum</span>
+              </li>
+              <li data-dinner>
+                <time datetime="20:30" data-i18n="timeDinner">8:30 PM</time>
+                <strong data-i18n="dinnerEvent">Cena</strong>
+              </li>
+              <li data-dinner>
+                <time datetime="22:00" data-i18n="timeCake">10 PM</time>
+                <strong data-i18n="cakeEvent">Corte de torta</strong>
+              </li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      <section class="section places-section">
+        <div class="board places-board">
+          <div class="petals" aria-hidden="true">
+            <img class="petal petal-1" src="assets/img/petal.webp" alt="">
+            <img class="petal petal-2" src="assets/img/petal.webp" alt="">
+            <img class="petal petal-3" src="assets/img/petal.webp" alt="">
+            <img class="petal petal-4" src="assets/img/petal.webp" alt="">
+            <img class="petal petal-5" src="assets/img/petal.webp" alt="">
+            <img class="petal petal-6" src="assets/img/petal.webp" alt="">
+          </div>
+          <h2 class="section-title" data-i18n="placesTitle">Ubicación</h2>
+          <img class="acomm-decor" src="assets/img/acomm-decor.webp" alt="">
+          <div class="places">
+            <article class="place">
+              <h3 data-i18n="churchPlace">Ceremonia</h3>
+              <p>Catedral de San Felipe</p>
+              <a class="map-link" data-i18n="openMap" href="https://maps.app.goo.gl/LHVNAJ6i5qG8KRHc7" target="_blank" rel="noopener">Ver en el mapa</a>
+              <div class="map-frame">
+                <img class="map-ornament map-ornament-top" src="assets/img/map-top.webp" alt="">
+                <div class="map-embed">
+                  <iframe title="Catedral de San Felipe" src="https://maps.google.com/maps?q=Catedral+de+San+Felipe,+Yaracuy,+Venezuela&hl=es&z=16&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+                </div>
+                <img class="map-ornament map-ornament-bot" src="assets/img/map-bot.webp" alt="">
+              </div>
+            </article>
+            <article class="place" data-dinner>
+              <h3 data-i18n="dinnerPlace">Cena</h3>
+              <p>Eventos Platinum<br>Av. La Paz, San Felipe, Yaracuy</p>
+              <a class="map-link" data-i18n="openMap" href="https://maps.app.goo.gl/uYQwyhexiueHMFBx5" target="_blank" rel="noopener">Ver en el mapa</a>
+              <div class="map-frame">
+                <img class="map-ornament map-ornament-top" src="assets/img/map-top.webp" alt="">
+                <div class="map-embed">
+                  <iframe title="Eventos Platinum" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3924.9253817997983!2d-68.73745392630998!3d10.34785156695543!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e80cf46f3286015%3A0x9656c79a1e746118!2sEVENTOS%20PLATINIUM!5e0!3m2!1ses!2sve!4v1794095571254!5m2!1ses!2sve" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+                </div>
+                <img class="map-ornament map-ornament-bot" src="assets/img/map-bot.webp" alt="">
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section notes-section">
+        <div class="board notes-board">
+          <img class="notes-paper" src="assets/img/paper-hero.webp?v=27" alt="">
+          <div class="card-vine card-vine-r" aria-hidden="true">
+            <img src="assets/img/vine-r.webp?v=27" alt="">
+          </div>
+          <div class="notes-block notes-dress">
+            <h3 data-i18n="dressTitle">Vestimenta</h3>
+            <p data-i18n="dressBody"></p>
+          </div>
+          <div class="notes-block notes-attire">
+            <img class="dress-code-img" src="assets/img/dress-code.webp?v=46" width="283" height="211" alt="" decoding="async">
+          </div>
+        </div>
+      </section>
+
+      <section class="section gifts-section" id="obsequios">
+        <div class="inner gifts-inner">
+          <h2 class="section-title" data-i18n="giftsTitle">Obsequios</h2>
+          <p class="letter-copy gifts-body" data-i18n="giftsBody"></p>
+          <div id="payment-box" class="payment-row">
+            <div class="qr-slot">
+              <img id="qr-img" src="assets/img/pago-movil-qr.webp?v=40" width="1070" height="1072" alt="QR Pago Móvil">
+            </div>
+            <dl class="payment-details">
+              <div>
+                <dt data-i18n="payIdLabel">Cédula</dt>
+                <dd id="pay-id"></dd>
+              </div>
+              <div>
+                <dt data-i18n="payPhoneLabel">Teléfono</dt>
+                <dd id="pay-pm"></dd>
+              </div>
+              <div>
+                <dt data-i18n="payBankLabel">Banco</dt>
+                <dd id="pay-bank"></dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </section>
+
+      <section class="section rsvp-section" id="rsvp">
+        <div class="board rsvp-board">
+          <img class="rsvp-paper" src="assets/img/paper-edge.webp?v=43" alt="" decoding="async">
+          <div class="rsvp-vine rsvp-vine-l" aria-hidden="true">
+            <img src="assets/img/vine-l.webp?v=43" alt="">
+          </div>
+          <div class="rsvp-content">
+            <h2 class="section-title" data-i18n="rsvpTitle">Confirmación</h2>
+            <button id="rsvp-seal" class="wax-btn" type="button">
+              <img src="assets/img/wax-seal.webp" width="190" height="142" alt="RSVP">
+            </button>
+            <p class="seal-hint" data-i18n="sealHint">Toca el sello</p>
+            <div id="rsvp-party" class="party is-hidden" aria-live="polite"></div>
+            <p id="rsvp-status" class="rsvp-status" aria-live="polite"></p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <audio id="sfx-open" preload="none"></audio>
+    <audio id="ambiente" preload="auto" loop>
+      <source src="assets/audio/ambiente.m4a" type="audio/mp4">
+    </audio>
+    <script src="js/config.js?v=48" defer></script>
+    <script src="js/i18n.js?v=48" defer></script>
+    <script src="js/app.js?v=48" defer></script>
+  </body>
+</html>
