@@ -23,6 +23,7 @@ function doGet(e) {
 
   if (action === "guest") out = getGuest(code);
   else if (action === "rsvp") out = setRsvp(code, p.status, p.p || p.people || "");
+  else if (action === "codes") out = listCodes_();
   else out = { ok: false, error: "unknown_action" };
 
   return ContentService
@@ -124,6 +125,17 @@ function listInviteUrls() {
     lines.push(label + "\nhttps://deverik-98.github.io/s-and-e/nos-casamos/" + values[i][0]);
   }
   SpreadsheetApp.getUi().alert(lines.length ? lines.join("\n\n") : "No hay invitados.");
+}
+
+/** Public API: { ok, codes: ["abc123", ...] } — used to generate GitHub Pages invite folders. */
+function listCodes_() {
+  var values = sheet_().getDataRange().getValues();
+  var codes = [];
+  for (var i = 1; i < values.length; i++) {
+    var code = String(values[i][0] || "").trim();
+    if (code) codes.push(code);
+  }
+  return { ok: true, codes: codes, count: codes.length };
 }
 
 function addGuest(name, variant, companions) {
