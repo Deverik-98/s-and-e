@@ -44,9 +44,9 @@ SE.config = {
 };
 
 SE.inviteUrl = function inviteUrl(code) {
-  // Query form returns HTTP 200 (needed for WhatsApp/Open Graph previews).
-  // Path form /nos-casamos/CODE still works for guests via 404.html, but scrapers often skip 404.
+  // Path form requires a generated page (scripts/gen-invite-pages.sh) so GitHub Pages
+  // returns HTTP 200 — WhatsApp ignores Open Graph on the SPA 404.html fallback.
   const base = SE.config.pagesUrl.replace(/\/+$/, "");
-  const param = SE.config.codeParam || "i";
-  return `${base}/?${param}=${encodeURIComponent(code)}`;
+  const slug = SE.config.inviteSlug;
+  return `${base}/${slug}/${encodeURIComponent(code)}`;
 };
